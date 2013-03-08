@@ -593,17 +593,25 @@ nouveau_card_init(struct drm_device *dev)
 	if (ret)
 		goto out_gpio;
 
+	NV_INFO(dev, "OK, GPUOBJ initialized\n");
+
 	ret = engine->instmem.init(dev);
 	if (ret)
 		goto out_gpuobj;
+
+	NV_INFO(dev, "OK, INSTMEM initialized\n");
 
 	ret = nouveau_mem_vram_init(dev);
 	if (ret)
 		goto out_instmem;
 
+	NV_INFO(dev, "OK, VRAM initialized\n");
+
 	ret = nouveau_mem_gart_init(dev);
 	if (ret)
 		goto out_ttmvram;
+
+	NV_INFO(dev, "OK, GART initialized\n");
 
 	if (!dev_priv->noaccel) {
 		switch (dev_priv->card_type) {
@@ -630,6 +638,7 @@ nouveau_card_init(struct drm_device *dev)
 		case NV_C0:
 		case NV_D0:
 			nvc0_fifo_create(dev);
+			NV_INFO(dev, "OK, FIFO initialized\n");
 			break;
 		case NV_E0:
 			nve0_fifo_create(dev);
@@ -656,6 +665,7 @@ nouveau_card_init(struct drm_device *dev)
 		case NV_D0:
 		case NV_E0:
 			nvc0_fence_create(dev);
+			NV_INFO(dev, "OK, FENCE initialized\n");
 			break;
 		default:
 			break;
@@ -676,6 +686,7 @@ nouveau_card_init(struct drm_device *dev)
 		case NV_D0:
 		case NV_E0:
 			nvc0_software_create(dev);
+			NV_INFO(dev, "OK, SOFTWARE initialized\n");
 			break;
 		default:
 			break;
@@ -701,6 +712,7 @@ nouveau_card_init(struct drm_device *dev)
 		case NV_C0:
 		case NV_D0:
 			nvc0_graph_create(dev);
+			NV_INFO(dev, "OK, GRAPH initialized\n");
 			break;
 		case NV_E0:
 			nve0_graph_create(dev);
@@ -741,6 +753,7 @@ nouveau_card_init(struct drm_device *dev)
 		case NV_D0:
 			if (!(nv_rd32(dev, 0x022500) & 0x00000100))
 				nvc0_copy_create(dev, 0);
+			NV_INFO(dev, "OK, COPY initialized\n");
 			break;
 		default:
 			break;
@@ -753,8 +766,11 @@ nouveau_card_init(struct drm_device *dev)
 		} else
 		if (dev_priv->chipset >= 0x84) {
 			nv50_mpeg_create(dev);
+			NV_INFO(dev, "OK, MPEG initialized\n");
 			nv84_bsp_create(dev);
+			NV_INFO(dev, "OK, BSP initialized\n");
 			nv84_vp_create(dev);
+			NV_INFO(dev, "OK, VP initialized\n");
 		} else
 		if (dev_priv->chipset >= 0x50) {
 			nv50_mpeg_create(dev);
@@ -774,30 +790,38 @@ nouveau_card_init(struct drm_device *dev)
 			}
 		}
 	}
+	NV_INFO(dev, "OK, ACCEL initialized\n");
 
 	ret = nouveau_irq_init(dev);
 	if (ret)
 		goto out_engine;
+	NV_INFO(dev, "OK, IRQ initialized\n");
 
 	ret = nouveau_display_create(dev);
 	if (ret)
 		goto out_irq;
+	NV_INFO(dev, "OK, DISPLAY initialized\n");
 
 	nouveau_backlight_init(dev);
+	NV_INFO(dev, "OK, BACKLIGHT initialized\n");
 	nouveau_pm_init(dev);
+	NV_INFO(dev, "OK, PM initialized\n");
 
 	if (dev_priv->eng[NVOBJ_ENGINE_GR]) {
 		ret = nouveau_card_channel_init(dev);
 		if (ret)
 			goto out_pm;
+		NV_INFO(dev, "OK, CARD CHANNEL initialized\n");
 	}
 
 	if (dev->mode_config.num_crtc) {
 		ret = nouveau_display_init(dev);
 		if (ret)
 			goto out_chan;
+		NV_INFO(dev, "OK, DISPLAY2 initialized\n");
 
 		nouveau_fbcon_init(dev);
+		NV_INFO(dev, "OK, FBCON initialized\n");
 	}
 
 	return 0;
