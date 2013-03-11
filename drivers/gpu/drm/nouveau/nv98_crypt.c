@@ -196,6 +196,7 @@ nv98_crypt_create(struct drm_device *dev)
 {
 	struct nv98_crypt_priv *priv;
 
+	NV_INFO(dev, "NV98 CRYPTO\n");
 	priv = kzalloc(sizeof(*priv), GFP_KERNEL);
 	if (!priv)
 		return -ENOMEM;

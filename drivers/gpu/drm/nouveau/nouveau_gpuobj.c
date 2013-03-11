@@ -355,6 +355,7 @@ nv50_gpuobj_dma_init(struct nouveau_gpuobj *obj, u32 offset, int class,
 	switch (target) {
 	case NV_MEM_TARGET_VRAM:
 		flags0 |= 0x00010000;
+		base += NOUVEAU_2G;
 		break;
 	case NV_MEM_TARGET_PCI:
 		flags0 |= 0x00020000;
@@ -579,8 +580,8 @@ nvc0_gpuobj_channel_init(struct nouveau_channel *chan, struct nouveau_vm *vm)
 
 	/* point channel at vm's page directory */
 	vpgd = list_first_entry(&vm->pgd_list, struct nouveau_vm_pgd, head);
-	nv_wo32(chan->ramin, 0x0200, lower_32_bits(vpgd->obj->vinst));
-	nv_wo32(chan->ramin, 0x0204, upper_32_bits(vpgd->obj->vinst));
+	nv_wo32(chan->ramin, 0x0200, lower_32_bits(vpgd->obj->vinst + NOUVEAU_2G));
+	nv_wo32(chan->ramin, 0x0204, upper_32_bits(vpgd->obj->vinst + NOUVEAU_2G));
 	nv_wo32(chan->ramin, 0x0208, 0xffffffff);
 	nv_wo32(chan->ramin, 0x020c, 0x000000ff);
 
@@ -766,7 +767,7 @@ nv_ro32(struct nouveau_gpuobj *gpuobj, u32 offset)
 	unsigned long flags;
 
 	if (gpuobj->pinst == ~0 || !dev_priv->ramin_available) {
-		u64  ptr = gpuobj->vinst + offset;
+		u64  ptr = gpuobj->vinst + NOUVEAU_2G + offset;
 		u32 base = ptr >> 16;
 		u32  val;
 
@@ -791,7 +792,7 @@ nv_wo32(struct nouveau_gpuobj *gpuobj, u32 offset, u32 val)
 	unsigned long flags;
 
 	if (gpuobj->pinst == ~0 || !dev_priv->ramin_available) {
-		u64  ptr = gpuobj->vinst + offset;
+		u64  ptr = gpuobj->vinst + NOUVEAU_2G + offset;
 		u32 base = ptr >> 16;
 
 		spin_lock_irqsave(&dev_priv->vm_lock, flags);

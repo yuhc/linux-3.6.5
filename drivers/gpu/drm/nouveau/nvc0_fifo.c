@@ -64,7 +64,7 @@ nvc0_fifo_playlist_update(struct drm_device *dev)
 	}
 	pinstmem->flush(dev);
 
-	nv_wr32(dev, 0x002270, cur->vinst >> 12);
+	nv_wr32(dev, 0x002270, (cur->vinst + NOUVEAU_2G) >> 12);
 	nv_wr32(dev, 0x002274, 0x01f00000 | (p >> 3));
 	if (!nv_wait(dev, 0x00227c, 0x00100000, 0x00000000))
 		NV_ERROR(dev, "PFIFO - playlist update failed\n");
@@ -104,8 +104,8 @@ nvc0_fifo_context_new(struct nouveau_channel *chan, int engine)
 
 	for (i = 0; i < 0x100; i += 4)
 		nv_wo32(chan->ramin, i, 0x00000000);
-	nv_wo32(chan->ramin, 0x08, lower_32_bits(fctx->user->vinst));
-	nv_wo32(chan->ramin, 0x0c, upper_32_bits(fctx->user->vinst));
+	nv_wo32(chan->ramin, 0x08, lower_32_bits(fctx->user->vinst + NOUVEAU_2G));
+	nv_wo32(chan->ramin, 0x0c, upper_32_bits(fctx->user->vinst + NOUVEAU_2G));
 	nv_wo32(chan->ramin, 0x10, 0x0000face);
 	nv_wo32(chan->ramin, 0x30, 0xfffff902);
 	nv_wo32(chan->ramin, 0x48, lower_32_bits(ib_virt));
@@ -124,7 +124,7 @@ nvc0_fifo_context_new(struct nouveau_channel *chan, int engine)
 	pinstmem->flush(dev);
 
 	nv_wr32(dev, 0x003000 + (chan->id * 8), 0xc0000000 |
-						(chan->ramin->vinst >> 12));
+						((chan->ramin->vinst + NOUVEAU_2G) >> 12));
 	nv_wr32(dev, 0x003004 + (chan->id * 8), 0x001f0001);
 	nvc0_fifo_playlist_update(dev);
 
@@ -205,7 +205,7 @@ nvc0_fifo_init(struct drm_device *dev, int engine)
 			continue;
 
 		nv_wr32(dev, 0x003000 + (i * 8), 0xc0000000 |
-						 (chan->ramin->vinst >> 12));
+						 ((chan->ramin->vinst + NOUVEAU_2G) >> 12));
 		nv_wr32(dev, 0x003004 + (i * 8), 0x001f0001);
 	}
 	nvc0_fifo_playlist_update(dev);

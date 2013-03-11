@@ -130,9 +130,9 @@ nouveau_ramht_insert(struct nouveau_channel *chan, u32 handle,
 	co = ho = nouveau_ramht_hash_handle(chan, handle);
 	do {
 		if (!nouveau_ramht_entry_valid(dev, ramht, co)) {
-			NV_DEBUG(dev,
-				 "insert ch%d 0x%08x: h=0x%08x, c=0x%08x\n",
-				 chan->id, co, handle, ctx);
+			NV_INFO(dev,
+				"insert ch%d 0x%08x: h=0x%08x, c=0x%08x\n",
+				chan->id, co, handle, ctx);
 			nv_wo32(ramht, co + 0, handle);
 			nv_wo32(ramht, co + 4, ctx);
 
@@ -140,8 +140,8 @@ nouveau_ramht_insert(struct nouveau_channel *chan, u32 handle,
 			instmem->flush(dev);
 			return 0;
 		}
-		NV_DEBUG(dev, "collision ch%d 0x%08x: h=0x%08x\n",
-			 chan->id, co, nv_ro32(ramht, co));
+		NV_INFO(dev, "collision ch%d 0x%08x: h=0x%08x\n",
+			chan->id, co, nv_ro32(ramht, co));
 
 		co += 8;
 		if (co >= ramht->size)

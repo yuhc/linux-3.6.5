@@ -264,6 +264,7 @@ nv50_display_init(struct drm_device *dev)
 	evo = nv50_display(dev)->master;
 
 	nv_wr32(dev, NV50_PDISPLAY_OBJECTS, ((evo->ramin->vinst + NOUVEAU_2G) >> 8) | 9);
+	// nv_wr32(dev, NV50_PDISPLAY_OBJECTS, ((evo->ramin->vinst) >> 8) | 9);
 
 	ret = RING_SPACE(evo, 3);
 	if (ret)
@@ -656,6 +657,7 @@ nv50_display_vblank_crtc_handler(struct drm_device *dev, int crtc)
 
 		spin_lock(&psw->peephole_lock);
 		nv_wr32(dev, 0x001704, (pch->vblank.channel + (NOUVEAU_2G >> 12)));
+		// nv_wr32(dev, 0x001704, (pch->vblank.channel));
 		nv_wr32(dev, 0x001710, 0x80000000 | pch->vblank.ctxdma);
 		if (dev_priv->chipset == 0x50) {
 			nv_wr32(dev, 0x001570, pch->vblank.offset);
