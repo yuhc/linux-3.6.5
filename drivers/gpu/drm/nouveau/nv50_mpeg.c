@@ -60,8 +60,8 @@ nv50_mpeg_context_new(struct nouveau_channel *chan, int engine)
 		return ret;
 
 	nv_wo32(ramin, CTX_PTR(dev, 0x00), 0x80190002);
-	nv_wo32(ramin, CTX_PTR(dev, 0x04), ctx->vinst + ctx->size - 1);
-	nv_wo32(ramin, CTX_PTR(dev, 0x08), ctx->vinst);
+	nv_wo32(ramin, CTX_PTR(dev, 0x04), (ctx->vinst + NOUVEAU_2G) + ctx->size - 1);
+	nv_wo32(ramin, CTX_PTR(dev, 0x08), (ctx->vinst + NOUVEAU_2G));
 	nv_wo32(ramin, CTX_PTR(dev, 0x0c), 0);
 	nv_wo32(ramin, CTX_PTR(dev, 0x10), 0);
 	nv_wo32(ramin, CTX_PTR(dev, 0x14), 0x00010000);
