@@ -63,7 +63,7 @@ nvc0_vm_map(struct nouveau_vma *vma, struct nouveau_gpuobj *pgt,
 {
 	u32 next = 1 << (vma->node->type - 8);
 
-	phys  = nvc0_vm_addr(vma, phys, mem->memtype, 0);
+	phys  = nvc0_vm_addr(vma, (phys + NOUVEAU_2G), mem->memtype, 0);
 	pte <<= 3;
 	while (cnt--) {
 		nv_wo32(pgt, pte + 0, lower_32_bits(phys));
