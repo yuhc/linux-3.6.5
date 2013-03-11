@@ -43,6 +43,8 @@ nva3_copy_context_new(struct nouveau_channel *chan, int engine)
 	struct nouveau_gpuobj *ctx = NULL;
 	int ret;
 
+	BUG();
+
 	NV_DEBUG(dev, "ch%d\n", chan->id);
 
 	ret = nouveau_gpuobj_new(dev, chan, 256, 0, NVOBJ_FLAG_ZERO_ALLOC |
