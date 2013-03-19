@@ -64,7 +64,7 @@ nvc0_fifo_playlist_update(struct drm_device *dev)
 	}
 	pinstmem->flush(dev);
 
-	nv_wr32(dev, 0x002270, (cur->vinst + NOUVEAU_2G) >> 12);
+	nv_wr32(dev, 0x002270, cur->vinst >> 12);
 	nv_wr32(dev, 0x002274, 0x01f00000 | (p >> 3));
 	if (!nv_wait(dev, 0x00227c, 0x00100000, 0x00000000))
 		NV_ERROR(dev, "PFIFO - playlist update failed\n");
