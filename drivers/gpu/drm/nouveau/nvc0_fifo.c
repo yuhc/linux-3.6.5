@@ -124,7 +124,7 @@ nvc0_fifo_context_new(struct nouveau_channel *chan, int engine)
 	pinstmem->flush(dev);
 
 	nv_wr32(dev, 0x003000 + (chan->id * 8), 0xc0000000 |
-						((chan->ramin->vinst + NOUVEAU_2G) >> 12));
+						(chan->ramin->vinst >> 12));
 	nv_wr32(dev, 0x003004 + (chan->id * 8), 0x001f0001);
 	nvc0_fifo_playlist_update(dev);
 
@@ -205,7 +205,7 @@ nvc0_fifo_init(struct drm_device *dev, int engine)
 			continue;
 
 		nv_wr32(dev, 0x003000 + (i * 8), 0xc0000000 |
-						 ((chan->ramin->vinst + NOUVEAU_2G) >> 12));
+						 (chan->ramin->vinst >> 12));
 		nv_wr32(dev, 0x003004 + (i * 8), 0x001f0001);
 	}
 	nvc0_fifo_playlist_update(dev);
