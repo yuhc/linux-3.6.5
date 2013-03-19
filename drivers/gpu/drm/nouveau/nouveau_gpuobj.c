@@ -767,7 +767,7 @@ nv_ro32(struct nouveau_gpuobj *gpuobj, u32 offset)
 	unsigned long flags;
 
 	if (gpuobj->pinst == ~0 || !dev_priv->ramin_available) {
-		u64  ptr = gpuobj->vinst + NOUVEAU_2G + offset;
+		u64  ptr = gpuobj->vinst + offset;
 		u32 base = ptr >> 16;
 		u32  val;
 
@@ -792,7 +792,7 @@ nv_wo32(struct nouveau_gpuobj *gpuobj, u32 offset, u32 val)
 	unsigned long flags;
 
 	if (gpuobj->pinst == ~0 || !dev_priv->ramin_available) {
-		u64  ptr = gpuobj->vinst + NOUVEAU_2G + offset;
+		u64  ptr = gpuobj->vinst + offset;
 		u32 base = ptr >> 16;
 
 		spin_lock_irqsave(&dev_priv->vm_lock, flags);
