@@ -65,10 +65,11 @@ nvc0_graph_load_context(struct nouveau_channel *chan)
 	struct drm_device *dev = chan->dev;
 
 	nv_wr32(dev, 0x409840, 0x00000030);
-	nv_wr32(dev, 0x409500, 0x80000000 | (chan->ramin->vinst + NOUVEAU_2G) >> 12);
+	nv_wr32(dev, 0x409500, 0x80000000 | chan->ramin->vinst >> 12);
 	nv_wr32(dev, 0x409504, 0x00000003);
 	if (!nv_wait(dev, 0x409800, 0x00000010, 0x00000010))
 		NV_ERROR(dev, "PGRAPH: load_ctx timeout\n");
+
 	return 0;
 }
 
@@ -76,7 +77,7 @@ static int
 nvc0_graph_unload_context_to(struct drm_device *dev, u64 chan)
 {
 	nv_wr32(dev, 0x409840, 0x00000003);
-	nv_wr32(dev, 0x409500, 0x80000000 | (chan + NOUVEAU_2G) >> 12);
+	nv_wr32(dev, 0x409500, 0x80000000 | chan >> 12);
 	nv_wr32(dev, 0x409504, 0x00000009);
 	if (!nv_wait(dev, 0x409800, 0x00000001, 0x00000000)) {
 		NV_ERROR(dev, "PGRAPH: unload_ctx timeout\n");
@@ -102,7 +103,7 @@ nvc0_graph_construct_context(struct nouveau_channel *chan)
 
 	if (!nouveau_ctxfw) {
 		nv_wr32(dev, 0x409840, 0x80000000);
-		nv_wr32(dev, 0x409500, 0x80000000 | (chan->ramin->vinst + NOUVEAU_2G) >> 12);
+		nv_wr32(dev, 0x409500, 0x80000000 | chan->ramin->vinst >> 12);
 		nv_wr32(dev, 0x409504, 0x00000001);
 		if (!nv_wait(dev, 0x409800, 0x80000000, 0x80000000)) {
 			NV_ERROR(dev, "PGRAPH: HUB_SET_CHAN timeout\n");
@@ -126,7 +127,7 @@ nvc0_graph_construct_context(struct nouveau_channel *chan)
 
 	if (!nouveau_ctxfw) {
 		nv_wr32(dev, 0x409840, 0x80000000);
-		nv_wr32(dev, 0x409500, 0x80000000 | (chan->ramin->vinst + NOUVEAU_2G) >> 12);
+		nv_wr32(dev, 0x409500, 0x80000000 | chan->ramin->vinst >> 12);
 		nv_wr32(dev, 0x409504, 0x00000002);
 		if (!nv_wait(dev, 0x409800, 0x80000000, 0x80000000)) {
 			NV_ERROR(dev, "PGRAPH: HUB_CTX_SAVE timeout\n");
@@ -343,8 +344,8 @@ nvc0_graph_init_obj418880(struct drm_device *dev)
 	nv_wr32(dev, GPC_BCAST(0x08a4), 0x00000000);
 	for (i = 0; i < 4; i++)
 		nv_wr32(dev, GPC_BCAST(0x0888) + (i * 4), 0x00000000);
-	nv_wr32(dev, GPC_BCAST(0x08b4), (priv->unk4188b4->vinst + NOUVEAU_2G) >> 8);
-	nv_wr32(dev, GPC_BCAST(0x08b8), (priv->unk4188b8->vinst + NOUVEAU_2G)>> 8);
+	nv_wr32(dev, GPC_BCAST(0x08b4), priv->unk4188b4->vinst >> 8);
+	nv_wr32(dev, GPC_BCAST(0x08b8), priv->unk4188b8->vinst >> 8);
 }
 
 static void
@@ -660,7 +661,7 @@ void (*nouveau_callback_notify)(int subc, uint32_t data) = NULL;
 static void
 nvc0_graph_isr(struct drm_device *dev)
 {
-	u64 inst = ((u64)(nv_rd32(dev, 0x409b00) & 0x0fffffff) << 12) - NOUVEAU_2G;
+	u64 inst = (u64)(nv_rd32(dev, 0x409b00) & 0x0fffffff) << 12;
 	u32 chid = nvc0_graph_isr_chid(dev, inst);
 	u32 stat = nv_rd32(dev, 0x400100);
 	u32 addr = nv_rd32(dev, 0x400704);
