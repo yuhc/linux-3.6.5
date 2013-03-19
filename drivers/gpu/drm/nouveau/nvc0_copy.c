@@ -77,7 +77,7 @@ nvc0_copy_context_del(struct nouveau_channel *chan, int engine)
 	struct drm_device *dev = chan->dev;
 	u32 inst;
 
-	inst  = ((chan->ramin->vinst + NOUVEAU_2G) >> 12);
+	inst  = (chan->ramin->vinst >> 12);
 	inst |= 0x40000000;
 
 	/* disable fifo access */
