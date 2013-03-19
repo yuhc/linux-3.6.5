@@ -50,8 +50,8 @@ nvc0_instmem_resume(struct drm_device *dev)
 	struct nvc0_instmem_priv *priv = dev_priv->engine.instmem.priv;
 
 	nv_mask(dev, 0x100c80, 0x00000001, 0x00000000);
-	nv_wr32(dev, 0x001704, 0x80000000 | (priv->bar1->ramin->vinst + NOUVEAU_2G) >> 12);
-	nv_wr32(dev, 0x001714, 0xc0000000 | (priv->bar3->ramin->vinst + NOUVEAU_2G) >> 12);
+	nv_wr32(dev, 0x001704, 0x80000000 | priv->bar1->ramin->vinst >> 12);
+	nv_wr32(dev, 0x001714, 0xc0000000 | priv->bar3->ramin->vinst >> 12);
 	dev_priv->ramin_available = true;
 }
 
