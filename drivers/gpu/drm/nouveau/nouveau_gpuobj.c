@@ -580,8 +580,8 @@ nvc0_gpuobj_channel_init(struct nouveau_channel *chan, struct nouveau_vm *vm)
 
 	/* point channel at vm's page directory */
 	vpgd = list_first_entry(&vm->pgd_list, struct nouveau_vm_pgd, head);
-	nv_wo32(chan->ramin, 0x0200, lower_32_bits(vpgd->obj->vinst + NOUVEAU_2G));
-	nv_wo32(chan->ramin, 0x0204, upper_32_bits(vpgd->obj->vinst + NOUVEAU_2G));
+	nv_wo32(chan->ramin, 0x0200, lower_32_bits(vpgd->obj->vinst));
+	nv_wo32(chan->ramin, 0x0204, upper_32_bits(vpgd->obj->vinst));
 	nv_wo32(chan->ramin, 0x0208, 0xffffffff);
 	nv_wo32(chan->ramin, 0x020c, 0x000000ff);
 

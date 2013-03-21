@@ -103,8 +103,8 @@ nvc0_channel_new(struct drm_device *dev, u32 size, struct nouveau_vm *vm,
 		return ret;
 	}
 
-	nv_wo32(chan->ramin, 0x0200, lower_32_bits(pgd->vinst + NOUVEAU_2G));
-	nv_wo32(chan->ramin, 0x0204, upper_32_bits(pgd->vinst + NOUVEAU_2G));
+	nv_wo32(chan->ramin, 0x0200, lower_32_bits(pgd->vinst));
+	nv_wo32(chan->ramin, 0x0204, upper_32_bits(pgd->vinst));
 	nv_wo32(chan->ramin, 0x0208, lower_32_bits(vm_size - 1));
 	nv_wo32(chan->ramin, 0x020c, upper_32_bits(vm_size - 1));
 
