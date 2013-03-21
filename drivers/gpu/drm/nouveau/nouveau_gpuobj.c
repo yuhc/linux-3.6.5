@@ -355,6 +355,7 @@ nv50_gpuobj_dma_init(struct nouveau_gpuobj *obj, u32 offset, int class,
 	switch (target) {
 	case NV_MEM_TARGET_VRAM:
 		flags0 |= 0x00010000;
+		NV_INFO(obj->dev, "DMA object 0x%llX VRAM 0x%llX\n", obj->vinst, base);
 		base += NOUVEAU_2G;
 		break;
 	case NV_MEM_TARGET_PCI:
