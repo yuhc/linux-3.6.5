@@ -55,10 +55,10 @@ nvc0_fifo_playlist_update(struct drm_device *dev)
 	cur = priv->playlist[priv->cur_playlist];
 	priv->cur_playlist = !priv->cur_playlist;
 
-	for (i = 0, p = 0; i < 128; i++) {
-		if (!(nv_rd32(dev, 0x3004 + (i * 8)) & 1))
+	for (i = 0, p = 0; i < (128 - 64); i++) {
+		if (!(nv_rd32(dev, 0x3004 + ((i + 64) * 8)) & 1))
 			continue;
-		nv_wo32(cur, p + 0, i);
+		nv_wo32(cur, p + 0, i + 64);
 		nv_wo32(cur, p + 4, 0x00000004);
 		p += 8;
 	}
@@ -86,7 +86,7 @@ nvc0_fifo_context_new(struct nouveau_channel *chan, int engine)
 		return -ENOMEM;
 
 	chan->user = ioremap_wc(pci_resource_start(dev->pdev, 1) +
-				priv->user_vma.offset + (chan->id * 0x1000),
+				priv->user_vma.offset + ((chan->id + 64) * 0x1000),
 				PAGE_SIZE);
 	if (!chan->user) {
 		ret = -ENOMEM;
@@ -99,7 +99,7 @@ nvc0_fifo_context_new(struct nouveau_channel *chan, int engine)
 	if (ret)
 		goto error;
 
-	nouveau_vm_map_at(&priv->user_vma, chan->id * 0x1000,
+	nouveau_vm_map_at(&priv->user_vma, (chan->id + 64) * 0x1000,
 			  *(struct nouveau_mem **)fctx->user->node);
 
 	for (i = 0; i < 0x100; i += 4)
@@ -123,9 +123,9 @@ nvc0_fifo_context_new(struct nouveau_channel *chan, int engine)
 	nv_wo32(chan->ramin, 0xfc, 0x10000010); /* 0x002350 */
 	pinstmem->flush(dev);
 
-	nv_wr32(dev, 0x003000 + (chan->id * 8), 0xc0000000 |
+	nv_wr32(dev, 0x003000 + ((chan->id + 64) * 8), 0xc0000000 |
 						(chan->ramin->vinst >> 12));
-	nv_wr32(dev, 0x003004 + (chan->id * 8), 0x001f0001);
+	nv_wr32(dev, 0x003004 + ((chan->id + 64) * 8), 0x001f0001);
 	nvc0_fifo_playlist_update(dev);
 
 error:
@@ -140,12 +140,12 @@ nvc0_fifo_context_del(struct nouveau_channel *chan, int engine)
 	struct nvc0_fifo_chan *fctx = chan->engctx[engine];
 	struct drm_device *dev = chan->dev;
 
-	nv_mask(dev, 0x003004 + (chan->id * 8), 0x00000001, 0x00000000);
-	nv_wr32(dev, 0x002634, chan->id);
-	if (!nv_wait(dev, 0x0002634, 0xffffffff, chan->id))
+	nv_mask(dev, 0x003004 + ((chan->id + 64) * 8), 0x00000001, 0x00000000);
+	nv_wr32(dev, 0x002634, (chan->id + 64));
+	if (!nv_wait(dev, 0x0002634, 0xffffffff, (chan->id + 64)))
 		NV_WARN(dev, "0x2634 != chid: 0x%08x\n", nv_rd32(dev, 0x2634));
 	nvc0_fifo_playlist_update(dev);
-	nv_wr32(dev, 0x003000 + (chan->id * 8), 0x00000000);
+	nv_wr32(dev, 0x003000 + ((chan->id + 64) * 8), 0x00000000);
 
 	nouveau_gpuobj_ref(NULL, &fctx->user);
 	if (chan->user) {
@@ -199,14 +199,14 @@ nvc0_fifo_init(struct drm_device *dev, int engine)
 	nv_wr32(dev, 0x002140, 0xbfffffff);
 
 	/* restore PFIFO context table */
-	for (i = 0; i < 128; i++) {
+	for (i = 0; i < (128 - 64); i++) {
 		chan = dev_priv->channels.ptr[i];
 		if (!chan || !chan->engctx[engine])
 			continue;
 
-		nv_wr32(dev, 0x003000 + (i * 8), 0xc0000000 |
+		nv_wr32(dev, 0x003000 + ((i + 64) * 8), 0xc0000000 |
 						 (chan->ramin->vinst >> 12));
-		nv_wr32(dev, 0x003004 + (i * 8), 0x001f0001);
+		nv_wr32(dev, 0x003004 + ((i + 64) * 8), 0x001f0001);
 	}
 	nvc0_fifo_playlist_update(dev);
 
@@ -218,13 +218,13 @@ nvc0_fifo_fini(struct drm_device *dev, int engine, bool suspend)
 {
 	int i;
 
-	for (i = 0; i < 128; i++) {
-		if (!(nv_rd32(dev, 0x003004 + (i * 8)) & 1))
+	for (i = 0; i < (128 - 64); i++) {
+		if (!(nv_rd32(dev, 0x003004 + ((i + 64) * 8)) & 1))
 			continue;
 
-		nv_mask(dev, 0x003004 + (i * 8), 0x00000001, 0x00000000);
-		nv_wr32(dev, 0x002634, i);
-		if (!nv_wait(dev, 0x002634, 0xffffffff, i)) {
+		nv_mask(dev, 0x003004 + ((i + 64) * 8), 0x00000001, 0x00000000);
+		nv_wr32(dev, 0x002634, (i + 64));
+		if (!nv_wait(dev, 0x002634, 0xffffffff, (i + 64))) {
 			NV_INFO(dev, "PFIFO: kick ch %d failed: 0x%08x\n",
 				i, nv_rd32(dev, 0x002634));
 			return -EBUSY;
@@ -453,7 +453,7 @@ nvc0_fifo_create(struct drm_device *dev)
 	priv->base.base.fini = nvc0_fifo_fini;
 	priv->base.base.context_new = nvc0_fifo_context_new;
 	priv->base.base.context_del = nvc0_fifo_context_del;
-	priv->base.channels = 128;
+	priv->base.channels = 128 - 64;
 	dev_priv->eng[NVOBJ_ENGINE_FIFO] = &priv->base.base;
 
 	ret = nouveau_gpuobj_new(dev, NULL, 4096, 4096, 0, &priv->playlist[0]);
