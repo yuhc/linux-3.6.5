@@ -453,7 +453,7 @@ nvc0_fifo_create(struct drm_device *dev)
 	priv->base.base.fini = nvc0_fifo_fini;
 	priv->base.base.context_new = nvc0_fifo_context_new;
 	priv->base.base.context_del = nvc0_fifo_context_del;
-	priv->base.channels = 128 - 64;
+	priv->base.channels = 128;
 	dev_priv->eng[NVOBJ_ENGINE_FIFO] = &priv->base.base;
 
 	ret = nouveau_gpuobj_new(dev, NULL, 4096, 4096, 0, &priv->playlist[0]);
