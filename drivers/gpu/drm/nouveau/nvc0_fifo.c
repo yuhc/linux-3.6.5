@@ -55,10 +55,10 @@ nvc0_fifo_playlist_update(struct drm_device *dev)
 	cur = priv->playlist[priv->cur_playlist];
 	priv->cur_playlist = !priv->cur_playlist;
 
-	for (i = 0, p = 0; i < (128 - 64); i++) {
-		if (!(nv_rd32(dev, 0x3004 + ((i + 64) * 8)) & 1))
+	for (i = 0, p = 0; i < 128; i++) {
+		if (!(nv_rd32(dev, 0x3004 + (i * 8)) & 1))
 			continue;
-		nv_wo32(cur, p + 0, i + 64);
+		nv_wo32(cur, p + 0, i);
 		nv_wo32(cur, p + 4, 0x00000004);
 		p += 8;
 	}
