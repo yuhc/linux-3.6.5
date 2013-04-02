@@ -86,7 +86,7 @@ nvc0_fifo_context_new(struct nouveau_channel *chan, int engine)
 		return -ENOMEM;
 
 	chan->user = ioremap_wc(pci_resource_start(dev->pdev, 1) +
-				priv->user_vma.offset + ((chan->id + 64) * 0x1000),
+				priv->user_vma.offset + (chan->id * 0x1000),
 				PAGE_SIZE);
 	if (!chan->user) {
 		ret = -ENOMEM;
@@ -99,7 +99,7 @@ nvc0_fifo_context_new(struct nouveau_channel *chan, int engine)
 	if (ret)
 		goto error;
 
-	nouveau_vm_map_at(&priv->user_vma, (chan->id + 64) * 0x1000,
+	nouveau_vm_map_at(&priv->user_vma, chan->id * 0x1000,
 			  *(struct nouveau_mem **)fctx->user->node);
 
 	for (i = 0; i < 0x100; i += 4)
