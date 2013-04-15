@@ -69,6 +69,7 @@ nvc0_channel_del(struct nouveau_channel **pchan)
 	if (drm_mm_initialized(&chan->ramin_heap))
 		drm_mm_takedown(&chan->ramin_heap);
 	nouveau_gpuobj_ref(NULL, &chan->ramin);
+	nouveau_gpuobj_ref(NULL, &chan->shadow);
 	kfree(chan);
 }
 
@@ -86,6 +87,12 @@ nvc0_channel_new(struct drm_device *dev, u32 size, struct nouveau_vm *vm,
 	chan->dev = dev;
 
 	ret = nouveau_gpuobj_new(dev, NULL, size, 0x1000, 0, &chan->ramin);
+	if (ret) {
+		nvc0_channel_del(&chan);
+		return ret;
+	}
+
+	ret = nouveau_gpuobj_new(dev, NULL, size, 0x1000, 0, &chan->shadow);
 	if (ret) {
 		nvc0_channel_del(&chan);
 		return ret;

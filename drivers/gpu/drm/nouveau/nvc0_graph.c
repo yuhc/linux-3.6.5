@@ -65,7 +65,8 @@ nvc0_graph_load_context(struct nouveau_channel *chan)
 	struct drm_device *dev = chan->dev;
 
 	nv_wr32(dev, 0x409840, 0x00000030);
-	nv_wr32(dev, 0x409500, 0x80000000 | chan->ramin->vinst >> 12);
+	// nv_wr32(dev, 0x409500, 0x80000000 | chan->ramin->vinst >> 12);
+	nv_wr32(dev, 0x409500, 0x80000000 | chan->shadow->vinst >> 12);
 	nv_wr32(dev, 0x409504, 0x00000003);
 	if (!nv_wait(dev, 0x409800, 0x00000010, 0x00000010))
 		NV_ERROR(dev, "PGRAPH: load_ctx timeout\n");
@@ -103,7 +104,8 @@ nvc0_graph_construct_context(struct nouveau_channel *chan)
 
 	if (!nouveau_ctxfw) {
 		nv_wr32(dev, 0x409840, 0x80000000);
-		nv_wr32(dev, 0x409500, 0x80000000 | chan->ramin->vinst >> 12);
+		// nv_wr32(dev, 0x409500, 0x80000000 | chan->ramin->vinst >> 12);
+		nv_wr32(dev, 0x409500, 0x80000000 | chan->shadow->vinst >> 12);
 		nv_wr32(dev, 0x409504, 0x00000001);
 		if (!nv_wait(dev, 0x409800, 0x80000000, 0x80000000)) {
 			NV_ERROR(dev, "PGRAPH: HUB_SET_CHAN timeout\n");
@@ -127,7 +129,8 @@ nvc0_graph_construct_context(struct nouveau_channel *chan)
 
 	if (!nouveau_ctxfw) {
 		nv_wr32(dev, 0x409840, 0x80000000);
-		nv_wr32(dev, 0x409500, 0x80000000 | chan->ramin->vinst >> 12);
+		// nv_wr32(dev, 0x409500, 0x80000000 | chan->ramin->vinst >> 12);
+		nv_wr32(dev, 0x409500, 0x80000000 | chan->shadow->vinst >> 12);
 		nv_wr32(dev, 0x409504, 0x00000002);
 		if (!nv_wait(dev, 0x409800, 0x80000000, 0x80000000)) {
 			NV_ERROR(dev, "PGRAPH: HUB_CTX_SAVE timeout\n");
@@ -275,6 +278,8 @@ nvc0_graph_context_new(struct nouveau_channel *chan, int engine)
 
 	nv_wo32(chan->ramin, 0x0210, lower_32_bits(grctx->linst) | 4);
 	nv_wo32(chan->ramin, 0x0214, upper_32_bits(grctx->linst));
+	nv_wo32(chan->shadow, 0x0210, lower_32_bits(grctx->linst) | 4);
+	nv_wo32(chan->shadow, 0x0214, upper_32_bits(grctx->linst));
 	pinstmem->flush(dev);
 
 	if (!priv->grctx_vals) {

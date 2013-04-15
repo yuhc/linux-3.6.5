@@ -104,6 +104,7 @@ nvc0_fifo_context_new(struct nouveau_channel *chan, int engine)
 
 	for (i = 0; i < 0x100; i += 4)
 		nv_wo32(chan->ramin, i, 0x00000000);
+
 	nv_wo32(chan->ramin, 0x08, lower_32_bits(fctx->user->vinst));
 	nv_wo32(chan->ramin, 0x0c, upper_32_bits(fctx->user->vinst));
 	nv_wo32(chan->ramin, 0x10, 0x0000face);
@@ -121,10 +122,16 @@ nvc0_fifo_context_new(struct nouveau_channel *chan, int engine)
 	nv_wo32(chan->ramin, 0xb8, 0xf8000000);
 	nv_wo32(chan->ramin, 0xf8, 0x10003080); /* 0x002310 */
 	nv_wo32(chan->ramin, 0xfc, 0x10000010); /* 0x002350 */
+
+	for (i = 0; i < 0x100; i += 4) {
+		const uint32_t val = nv_ro32(chan->ramin, i);
+		nv_wo32(chan->shadow, i, val);
+	}
+
 	pinstmem->flush(dev);
 
 	nv_wr32(dev, 0x003000 + (chan->id * 8), 0xc0000000 |
-						(chan->ramin->vinst >> 12));
+						(chan->shadow->vinst >> 12));
 	nv_wr32(dev, 0x003004 + (chan->id * 8), 0x001f0001);
 	nvc0_fifo_playlist_update(dev);
 
@@ -205,7 +212,7 @@ nvc0_fifo_init(struct drm_device *dev, int engine)
 			continue;
 
 		nv_wr32(dev, 0x003000 + (i * 8), 0xc0000000 |
-						 (chan->ramin->vinst >> 12));
+						 (chan->shadow->vinst >> 12));
 		nv_wr32(dev, 0x003004 + (i * 8), 0x001f0001);
 	}
 	nvc0_fifo_playlist_update(dev);

@@ -262,6 +262,7 @@ struct nouveau_channel {
 
 	/* Objects */
 	struct nouveau_gpuobj *ramin; /* Private instmem */
+	struct nouveau_gpuobj *shadow; /* Shadow ramin for debugging */
 	struct drm_mm          ramin_heap; /* Private PRAMIN heap */
 	struct nouveau_ramht  *ramht; /* Hash table */
 

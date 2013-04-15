@@ -163,6 +163,7 @@ nouveau_gpuobj_new(struct drm_device *dev, struct nouveau_channel *chan,
 	spin_unlock(&dev_priv->ramin_lock);
 
 	if (!(flags & NVOBJ_FLAG_VM) && chan) {
+		NV_INFO(dev, "channel ramin heap object\n");
 		ramin = drm_mm_search_free(&chan->ramin_heap, size, align, 0);
 		if (ramin)
 			ramin = drm_mm_get_block(ramin, size, align);
@@ -565,6 +566,10 @@ nvc0_gpuobj_channel_init(struct nouveau_channel *chan, struct nouveau_vm *vm)
 	if (ret)
 		return ret;
 
+	ret = nouveau_gpuobj_new(dev, NULL, 4096, 0x1000, 0, &chan->shadow);
+	if (ret)
+		return ret;
+
 	/* create page directory for this vm if none currently exists,
 	 * will be destroyed automagically when last reference to the
 	 * vm is removed
@@ -583,6 +588,11 @@ nvc0_gpuobj_channel_init(struct nouveau_channel *chan, struct nouveau_vm *vm)
 	nv_wo32(chan->ramin, 0x0204, upper_32_bits(vpgd->obj->vinst));
 	nv_wo32(chan->ramin, 0x0208, 0xffffffff);
 	nv_wo32(chan->ramin, 0x020c, 0x000000ff);
+
+	nv_wo32(chan->shadow, 0x0200, lower_32_bits(vpgd->obj->vinst));
+	nv_wo32(chan->shadow, 0x0204, upper_32_bits(vpgd->obj->vinst));
+	nv_wo32(chan->shadow, 0x0208, 0xffffffff);
+	nv_wo32(chan->shadow, 0x020c, 0x000000ff);
 
 	return 0;
 }

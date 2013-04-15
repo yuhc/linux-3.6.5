@@ -56,6 +56,8 @@ nvc0_copy_context_new(struct nouveau_channel *chan, int engine)
 
 	nv_wo32(ramin, pcopy->ctx + 0, lower_32_bits(ctx->linst));
 	nv_wo32(ramin, pcopy->ctx + 4, upper_32_bits(ctx->linst));
+	nv_wo32(chan->shadow, pcopy->ctx + 0, lower_32_bits(ctx->linst));
+	nv_wo32(chan->shadow, pcopy->ctx + 4, upper_32_bits(ctx->linst));
 	dev_priv->engine.instmem.flush(dev);
 
 	chan->engctx[engine] = ctx;
@@ -77,7 +79,7 @@ nvc0_copy_context_del(struct nouveau_channel *chan, int engine)
 	struct drm_device *dev = chan->dev;
 	u32 inst;
 
-	inst  = (chan->ramin->vinst >> 12);
+	inst  = (chan->shadow->vinst >> 12);
 	inst |= 0x40000000;
 
 	/* disable fifo access */
@@ -93,6 +95,8 @@ nvc0_copy_context_del(struct nouveau_channel *chan, int engine)
 
 	nv_wo32(chan->ramin, pcopy->ctx + 0, 0x00000000);
 	nv_wo32(chan->ramin, pcopy->ctx + 4, 0x00000000);
+	nv_wo32(chan->shadow, pcopy->ctx + 0, 0x00000000);
+	nv_wo32(chan->shadow, pcopy->ctx + 4, 0x00000000);
 	nouveau_gpuobj_ref(NULL, &ctx);
 
 	chan->engctx[engine] = ctx;
