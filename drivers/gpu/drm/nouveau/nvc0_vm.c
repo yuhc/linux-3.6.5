@@ -34,9 +34,9 @@ nvc0_vm_map_pgt(struct nouveau_gpuobj *pgd, u32 index,
 	u32 pde[2] = { 0, 0 };
 
 	if (pgt[0])
-		pde[1] = 0x00000001 | ((pgt[0]->vinst + NOUVEAU_2G) >> 8);
+		pde[1] = 0x00000001 | (pgt[0]->vinst >> 8);
 	if (pgt[1])
-		pde[0] = 0x00000001 | ((pgt[1]->vinst + NOUVEAU_2G) >> 8);
+		pde[0] = 0x00000001 | (pgt[1]->vinst >> 8);
 
 	nv_wo32(pgd, (index * 8) + 0, pde[0]);
 	nv_wo32(pgd, (index * 8) + 4, pde[1]);
@@ -63,7 +63,7 @@ nvc0_vm_map(struct nouveau_vma *vma, struct nouveau_gpuobj *pgt,
 {
 	u32 next = 1 << (vma->node->type - 8);
 
-	phys  = nvc0_vm_addr(vma, (phys + NOUVEAU_2G), mem->memtype, 0);
+	phys  = nvc0_vm_addr(vma, phys, mem->memtype, 0);
 	pte <<= 3;
 	while (cnt--) {
 		nv_wo32(pgt, pte + 0, lower_32_bits(phys));
