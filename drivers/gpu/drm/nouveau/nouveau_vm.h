@@ -38,6 +38,7 @@ struct nouveau_vm_pgt {
 struct nouveau_vm_pgd {
 	struct list_head head;
 	struct nouveau_gpuobj *obj;
+  struct nouveau_gpuobj *shadow;
 };
 
 struct nouveau_vma {
@@ -83,7 +84,7 @@ struct nouveau_vm {
 int  nouveau_vm_new(struct drm_device *, u64 offset, u64 length, u64 mm_offset,
 		    struct nouveau_vm **);
 int  nouveau_vm_ref(struct nouveau_vm *, struct nouveau_vm **,
-		    struct nouveau_gpuobj *pgd);
+		    struct nouveau_gpuobj *pgd, struct nouveau_gpuobj *shadow);
 int  nouveau_vm_get(struct nouveau_vm *, u64 size, u32 page_shift,
 		    u32 access, struct nouveau_vma *);
 void nouveau_vm_put(struct nouveau_vma *);

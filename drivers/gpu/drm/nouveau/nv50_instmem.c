@@ -54,7 +54,7 @@ nv50_channel_del(struct nouveau_channel **pchan)
 		return;
 
 	nouveau_gpuobj_ref(NULL, &chan->ramfc);
-	nouveau_vm_ref(NULL, &chan->vm, chan->vm_pd);
+	nouveau_vm_ref(NULL, &chan->vm, chan->vm_pd, NULL);
 	nouveau_gpuobj_ref(NULL, &chan->vm_pd);
 	if (drm_mm_initialized(&chan->ramin_heap))
 		drm_mm_takedown(&chan->ramin_heap);
@@ -104,7 +104,7 @@ nv50_channel_new(struct drm_device *dev, u32 size, struct nouveau_vm *vm,
 		nv_wo32(chan->vm_pd, i + 4, 0xdeadcafe);
 	}
 
-	ret = nouveau_vm_ref(vm, &chan->vm, chan->vm_pd);
+	ret = nouveau_vm_ref(vm, &chan->vm, chan->vm_pd, NULL);
 	if (ret) {
 		nv50_channel_del(&chan);
 		return ret;
@@ -198,10 +198,10 @@ nv50_instmem_init(struct drm_device *dev)
 	if (ret)
 		goto error;
 
-	ret = nouveau_vm_ref(vm, &dev_priv->bar1_vm, chan->vm_pd);
+	ret = nouveau_vm_ref(vm, &dev_priv->bar1_vm, chan->vm_pd, NULL);
 	if (ret)
 		goto error;
-	nouveau_vm_ref(NULL, &vm, NULL);
+	nouveau_vm_ref(NULL, &vm, NULL, NULL);
 
 	ret = nv50_gpuobj_dma_new(chan, 0x0000, BAR1_VM_BASE, BAR1_VM_SIZE,
 				  NV_MEM_TARGET_VM, NV_MEM_ACCESS_VM,
@@ -244,7 +244,7 @@ nv50_instmem_takedown(struct drm_device *dev)
 
 	dev_priv->ramin_available = false;
 
-	nouveau_vm_ref(NULL, &dev_priv->chan_vm, NULL);
+	nouveau_vm_ref(NULL, &dev_priv->chan_vm, NULL, NULL);
 
 	for (i = 0x1700; i <= 0x1710; i += 4)
 		nv_wr32(dev, i, priv->save1700[(i - 0x1700) / 4]);
@@ -252,12 +252,12 @@ nv50_instmem_takedown(struct drm_device *dev)
 	nouveau_gpuobj_ref(NULL, &priv->bar3_dmaobj);
 	nouveau_gpuobj_ref(NULL, &priv->bar1_dmaobj);
 
-	nouveau_vm_ref(NULL, &dev_priv->bar1_vm, chan->vm_pd);
+	nouveau_vm_ref(NULL, &dev_priv->bar1_vm, chan->vm_pd, NULL);
 	dev_priv->channels.ptr[127] = 0;
 	nv50_channel_del(&dev_priv->channels.ptr[0]);
 
 	nouveau_gpuobj_ref(NULL, &dev_priv->bar3_vm->pgt[0].obj[0]);
-	nouveau_vm_ref(NULL, &dev_priv->bar3_vm, NULL);
+	nouveau_vm_ref(NULL, &dev_priv->bar3_vm, NULL, NULL);
 
 	if (drm_mm_initialized(&dev_priv->ramin_heap))
 		drm_mm_takedown(&dev_priv->ramin_heap);

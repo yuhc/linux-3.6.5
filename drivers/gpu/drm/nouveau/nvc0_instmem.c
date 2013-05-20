@@ -65,7 +65,7 @@ nvc0_channel_del(struct nouveau_channel **pchan)
 	if (!chan)
 		return;
 
-	nouveau_vm_ref(NULL, &chan->vm, NULL);
+	nouveau_vm_ref(NULL, &chan->vm, NULL, NULL);
 	if (drm_mm_initialized(&chan->ramin_heap))
 		drm_mm_takedown(&chan->ramin_heap);
 	nouveau_gpuobj_ref(NULL, &chan->ramin);
@@ -97,7 +97,7 @@ nvc0_channel_new(struct drm_device *dev, u32 size, struct nouveau_vm *vm,
 		return ret;
 	}
 
-	ret = nouveau_vm_ref(vm, &chan->vm, NULL);
+	ret = nouveau_vm_ref(vm, &chan->vm, NULL, NULL);
 	if (ret) {
 		nvc0_channel_del(&chan);
 		return ret;
@@ -149,10 +149,10 @@ nvc0_instmem_init(struct drm_device *dev)
 	if (ret)
 		goto error;
 
-	ret = nouveau_vm_ref(dev_priv->bar3_vm, &vm, priv->bar3_pgd);
+	ret = nouveau_vm_ref(dev_priv->bar3_vm, &vm, priv->bar3_pgd, NULL);
 	if (ret)
 		goto error;
-	nouveau_vm_ref(NULL, &vm, NULL);
+	nouveau_vm_ref(NULL, &vm, NULL, NULL);
 
 	ret = nvc0_channel_new(dev, 8192, dev_priv->bar3_vm, &priv->bar3,
 			       priv->bar3_pgd, pci_resource_len(dev->pdev, 3));
@@ -169,10 +169,10 @@ nvc0_instmem_init(struct drm_device *dev)
 	if (ret)
 		goto error;
 
-	ret = nouveau_vm_ref(vm, &dev_priv->bar1_vm, priv->bar1_pgd);
+	ret = nouveau_vm_ref(vm, &dev_priv->bar1_vm, priv->bar1_pgd, NULL);
 	if (ret)
 		goto error;
-	nouveau_vm_ref(NULL, &vm, NULL);
+	nouveau_vm_ref(NULL, &vm, NULL, NULL);
 
 	ret = nvc0_channel_new(dev, 8192, dev_priv->bar1_vm, &priv->bar1,
 			       priv->bar1_pgd, pci_resource_len(dev->pdev, 1));
@@ -204,18 +204,18 @@ nvc0_instmem_takedown(struct drm_device *dev)
 	nv_wr32(dev, 0x1704, 0x00000000);
 	nv_wr32(dev, 0x1714, 0x00000000);
 
-	nouveau_vm_ref(NULL, &dev_priv->chan_vm, NULL);
+	nouveau_vm_ref(NULL, &dev_priv->chan_vm, NULL, NULL);
 
 	nvc0_channel_del(&priv->bar1);
-	nouveau_vm_ref(NULL, &dev_priv->bar1_vm, priv->bar1_pgd);
+	nouveau_vm_ref(NULL, &dev_priv->bar1_vm, priv->bar1_pgd, NULL);
 	nouveau_gpuobj_ref(NULL, &priv->bar1_pgd);
 
 	nvc0_channel_del(&priv->bar3);
-	nouveau_vm_ref(dev_priv->bar3_vm, &vm, NULL);
-	nouveau_vm_ref(NULL, &vm, priv->bar3_pgd);
+	nouveau_vm_ref(dev_priv->bar3_vm, &vm, NULL, NULL);
+	nouveau_vm_ref(NULL, &vm, priv->bar3_pgd, NULL);
 	nouveau_gpuobj_ref(NULL, &priv->bar3_pgd);
 	nouveau_gpuobj_ref(NULL, &dev_priv->bar3_vm->pgt[0].obj[0]);
-	nouveau_vm_ref(NULL, &dev_priv->bar3_vm, NULL);
+	nouveau_vm_ref(NULL, &dev_priv->bar3_vm, NULL, NULL);
 
 	dev_priv->engine.instmem.priv = NULL;
 	kfree(priv);

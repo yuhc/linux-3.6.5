@@ -228,6 +228,9 @@ nouveau_vm_unmap_pgt(struct nouveau_vm *vm, int big, u32 fpde, u32 lpde)
 
 		list_for_each_entry(vpgd, &vm->pgd_list, head) {
 			vm->map_pgt(vpgd->obj, pde, vpgt->obj);
+			if (vpgd->shadow) {
+        vm->map_pgt(vpgd->shadow, pde, vpgt->obj);
+      }
 		}
 
 		mutex_unlock(&vm->mm.mutex);
@@ -267,6 +270,9 @@ nouveau_vm_map_pgt(struct nouveau_vm *vm, u32 pde, u32 type)
 	vpgt->obj[big] = pgt;
 	list_for_each_entry(vpgd, &vm->pgd_list, head) {
 		vm->map_pgt(vpgd->obj, pde, vpgt->obj);
+    if (vpgd->shadow) {
+      vm->map_pgt(vpgd->shadow, pde, vpgt->obj);
+    }
 	}
 
 	return 0;
@@ -404,7 +410,7 @@ nouveau_vm_new(struct drm_device *dev, u64 offset, u64 length, u64 mm_offset,
 }
 
 static int
-nouveau_vm_link(struct nouveau_vm *vm, struct nouveau_gpuobj *pgd)
+nouveau_vm_link(struct nouveau_vm *vm, struct nouveau_gpuobj *pgd, struct nouveau_gpuobj *shadow)
 {
 	struct nouveau_vm_pgd *vpgd;
 	int i;
@@ -417,17 +423,24 @@ nouveau_vm_link(struct nouveau_vm *vm, struct nouveau_gpuobj *pgd)
 		return -ENOMEM;
 
 	nouveau_gpuobj_ref(pgd, &vpgd->obj);
+  if (shadow) {
+    nouveau_gpuobj_ref(shadow, &vpgd->shadow);
+  }
 
 	mutex_lock(&vm->mm.mutex);
-	for (i = vm->fpde; i <= vm->lpde; i++)
+	for (i = vm->fpde; i <= vm->lpde; i++) {
 		vm->map_pgt(pgd, i, vm->pgt[i - vm->fpde].obj);
+    if (shadow) {
+      vm->map_pgt(shadow, i, vm->pgt[i - vm->fpde].obj);
+    }
+  }
 	list_add(&vpgd->head, &vm->pgd_list);
 	mutex_unlock(&vm->mm.mutex);
 	return 0;
 }
 
 static void
-nouveau_vm_unlink(struct nouveau_vm *vm, struct nouveau_gpuobj *mpgd)
+nouveau_vm_unlink(struct nouveau_vm *vm, struct nouveau_gpuobj *mpgd, struct nouveau_gpuobj *shadow)
 {
 	struct nouveau_vm_pgd *vpgd, *tmp;
 	struct nouveau_gpuobj *pgd = NULL;
@@ -447,6 +460,9 @@ nouveau_vm_unlink(struct nouveau_vm *vm, struct nouveau_gpuobj *mpgd)
 	mutex_unlock(&vm->mm.mutex);
 
 	nouveau_gpuobj_ref(NULL, &pgd);
+  if (shadow) {
+    nouveau_gpuobj_ref(NULL, &shadow);
+  }
 }
 
 static void
@@ -455,7 +471,7 @@ nouveau_vm_del(struct nouveau_vm *vm)
 	struct nouveau_vm_pgd *vpgd, *tmp;
 
 	list_for_each_entry_safe(vpgd, tmp, &vm->pgd_list, head) {
-		nouveau_vm_unlink(vm, vpgd->obj);
+		nouveau_vm_unlink(vm, vpgd->obj, vpgd->shadow);
 	}
 
 	nouveau_mm_fini(&vm->mm);
@@ -465,14 +481,14 @@ nouveau_vm_del(struct nouveau_vm *vm)
 
 int
 nouveau_vm_ref(struct nouveau_vm *ref, struct nouveau_vm **ptr,
-	       struct nouveau_gpuobj *pgd)
+	       struct nouveau_gpuobj *pgd, struct nouveau_gpuobj *shadow)
 {
 	struct nouveau_vm *vm;
 	int ret;
 
 	vm = ref;
 	if (vm) {
-		ret = nouveau_vm_link(vm, pgd);
+		ret = nouveau_vm_link(vm, pgd, shadow);
 		if (ret)
 			return ret;
 
@@ -483,7 +499,7 @@ nouveau_vm_ref(struct nouveau_vm *ref, struct nouveau_vm **ptr,
 	*ptr = ref;
 
 	if (vm) {
-		nouveau_vm_unlink(vm, pgd);
+		nouveau_vm_unlink(vm, pgd, shadow);
 
 		if (--vm->refcount == 0)
 			nouveau_vm_del(vm);

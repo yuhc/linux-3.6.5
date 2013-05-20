@@ -947,7 +947,7 @@ void
 nouveau_postclose(struct drm_device *dev, struct drm_file *file_priv)
 {
 	struct nouveau_fpriv *fpriv = nouveau_fpriv(file_priv);
-	nouveau_vm_ref(NULL, &fpriv->vm, NULL);
+	nouveau_vm_ref(NULL, &fpriv->vm, NULL, NULL);
 	kfree(fpriv);
 }
 

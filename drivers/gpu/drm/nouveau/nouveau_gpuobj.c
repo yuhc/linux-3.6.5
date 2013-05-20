@@ -558,6 +558,7 @@ nvc0_gpuobj_channel_init(struct nouveau_channel *chan, struct nouveau_vm *vm)
 {
 	struct drm_device *dev = chan->dev;
 	struct nouveau_gpuobj *pgd = NULL;
+	struct nouveau_gpuobj *shadow = NULL;
 	struct nouveau_vm_pgd *vpgd;
 	int ret;
 
@@ -573,14 +574,18 @@ nvc0_gpuobj_channel_init(struct nouveau_channel *chan, struct nouveau_vm *vm)
 		ret = nouveau_gpuobj_new(dev, NULL, 65536, 0x1000, 0, &pgd);
 		if (ret)
 			return ret;
+		ret = nouveau_gpuobj_new(dev, NULL, 65536, 0x1000, 0, &shadow);
+		if (ret)
+			return ret;
 	}
-	nouveau_vm_ref(vm, &chan->vm, pgd);
+	nouveau_vm_ref(vm, &chan->vm, pgd, shadow);
 	nouveau_gpuobj_ref(NULL, &pgd);
+	nouveau_gpuobj_ref(NULL, &shadow);
 
 	/* point channel at vm's page directory */
 	vpgd = list_first_entry(&vm->pgd_list, struct nouveau_vm_pgd, head);
-	nv_wo32(chan->ramin, 0x0200, lower_32_bits(vpgd->obj->vinst));
-	nv_wo32(chan->ramin, 0x0204, upper_32_bits(vpgd->obj->vinst));
+	nv_wo32(chan->ramin, 0x0200, lower_32_bits(vpgd->shadow->vinst));
+	nv_wo32(chan->ramin, 0x0204, upper_32_bits(vpgd->shadow->vinst));
 	nv_wo32(chan->ramin, 0x0208, 0xffffffff);
 	nv_wo32(chan->ramin, 0x020c, 0x000000ff);
 
@@ -626,7 +631,7 @@ nouveau_gpuobj_channel_init(struct nouveau_channel *chan,
 		if (ret)
 			return ret;
 
-		nouveau_vm_ref(vm, &chan->vm, chan->vm_pd);
+		nouveau_vm_ref(vm, &chan->vm, chan->vm_pd, NULL);
 	}
 
 	/* RAMHT */
@@ -705,7 +710,7 @@ nouveau_gpuobj_channel_takedown(struct nouveau_channel *chan)
 {
 	NV_DEBUG(chan->dev, "ch%d\n", chan->id);
 
-	nouveau_vm_ref(NULL, &chan->vm, chan->vm_pd);
+	nouveau_vm_ref(NULL, &chan->vm, chan->vm_pd, NULL);
 	nouveau_gpuobj_ref(NULL, &chan->vm_pd);
 
 	if (drm_mm_initialized(&chan->ramin_heap))
