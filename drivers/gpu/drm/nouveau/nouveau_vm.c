@@ -229,7 +229,7 @@ nouveau_vm_unmap_pgt(struct nouveau_vm *vm, int big, u32 fpde, u32 lpde)
 		list_for_each_entry(vpgd, &vm->pgd_list, head) {
 			vm->map_pgt(vpgd->obj, pde, vpgt->obj);
 			if (vpgd->shadow) {
-				vm->map_pgt(vpgd->shadow, pde, vpgt->obj);
+				// vm->map_pgt(vpgd->shadow, pde, vpgt->obj);
 			}
 		}
 
@@ -271,7 +271,7 @@ nouveau_vm_map_pgt(struct nouveau_vm *vm, u32 pde, u32 type)
 	list_for_each_entry(vpgd, &vm->pgd_list, head) {
 		vm->map_pgt(vpgd->obj, pde, vpgt->obj);
 		if (vpgd->shadow) {
-			vm->map_pgt(vpgd->shadow, pde, vpgt->obj);
+			// vm->map_pgt(vpgd->shadow, pde, vpgt->obj);
 		}
 	}
 
@@ -431,7 +431,7 @@ nouveau_vm_link(struct nouveau_vm *vm, struct nouveau_gpuobj *pgd, struct nouvea
 	for (i = vm->fpde; i <= vm->lpde; i++) {
 		vm->map_pgt(pgd, i, vm->pgt[i - vm->fpde].obj);
 		if (shadow) {
-			vm->map_pgt(shadow, i, vm->pgt[i - vm->fpde].obj);
+			// vm->map_pgt(shadow, i, vm->pgt[i - vm->fpde].obj);
 		}
 	}
 	list_add(&vpgd->head, &vm->pgd_list);

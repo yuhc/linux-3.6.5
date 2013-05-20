@@ -128,6 +128,12 @@ nvc0_vm_flush(struct nouveau_vm *vm)
 				 nv_rd32(dev, 0x100c80), engine);
 		}
 		if (vpgd->shadow) {
+			/* merge */
+			u32 index;
+			for (index = 0; index < 65536; index += 0x4) {
+				u32 val = nv_ro32(vpgd->obj, index);
+				nv_wo32(vpgd->shadow, index, val);
+			}
 			nv_wr32(dev, 0x100cb8, vpgd->shadow->vinst >> 8);
 		} else {
 			nv_wr32(dev, 0x100cb8, vpgd->obj->vinst >> 8);
