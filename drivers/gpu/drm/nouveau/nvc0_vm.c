@@ -31,9 +31,9 @@ void
 nvc0_vm_map_pgt(struct nouveau_gpuobj *pgd, u32 index,
 		struct nouveau_gpuobj *pgt[2])
 {
-  if (!pgd) {
-    return;
-  }
+	if (!pgd) {
+		return;
+	}
 	u32 pde[2] = { 0, 0 };
 
 	if (pgt[0])
@@ -127,11 +127,11 @@ nvc0_vm_flush(struct nouveau_vm *vm)
 			NV_ERROR(dev, "vm timeout 0: 0x%08x %d\n",
 				 nv_rd32(dev, 0x100c80), engine);
 		}
-    if (vpgd->shadow) {
-      nv_wr32(dev, 0x100cb8, vpgd->shadow->vinst >> 8);
-    } else {
-      nv_wr32(dev, 0x100cb8, vpgd->obj->vinst >> 8);
-    }
+		if (vpgd->shadow) {
+			nv_wr32(dev, 0x100cb8, vpgd->shadow->vinst >> 8);
+		} else {
+			nv_wr32(dev, 0x100cb8, vpgd->obj->vinst >> 8);
+		}
 		nv_wr32(dev, 0x100cbc, 0x80000000 | engine);
 		/* wait for flush to be queued? */
 		if (!nv_wait(dev, 0x100c80, 0x00008000, 0x00008000)) {

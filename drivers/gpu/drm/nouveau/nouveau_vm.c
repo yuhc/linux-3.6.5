@@ -229,8 +229,8 @@ nouveau_vm_unmap_pgt(struct nouveau_vm *vm, int big, u32 fpde, u32 lpde)
 		list_for_each_entry(vpgd, &vm->pgd_list, head) {
 			vm->map_pgt(vpgd->obj, pde, vpgt->obj);
 			if (vpgd->shadow) {
-        vm->map_pgt(vpgd->shadow, pde, vpgt->obj);
-      }
+				vm->map_pgt(vpgd->shadow, pde, vpgt->obj);
+			}
 		}
 
 		mutex_unlock(&vm->mm.mutex);
@@ -270,9 +270,9 @@ nouveau_vm_map_pgt(struct nouveau_vm *vm, u32 pde, u32 type)
 	vpgt->obj[big] = pgt;
 	list_for_each_entry(vpgd, &vm->pgd_list, head) {
 		vm->map_pgt(vpgd->obj, pde, vpgt->obj);
-    if (vpgd->shadow) {
-      vm->map_pgt(vpgd->shadow, pde, vpgt->obj);
-    }
+		if (vpgd->shadow) {
+			vm->map_pgt(vpgd->shadow, pde, vpgt->obj);
+		}
 	}
 
 	return 0;
@@ -423,17 +423,17 @@ nouveau_vm_link(struct nouveau_vm *vm, struct nouveau_gpuobj *pgd, struct nouvea
 		return -ENOMEM;
 
 	nouveau_gpuobj_ref(pgd, &vpgd->obj);
-  if (shadow) {
-    nouveau_gpuobj_ref(shadow, &vpgd->shadow);
-  }
+	if (shadow) {
+		nouveau_gpuobj_ref(shadow, &vpgd->shadow);
+	}
 
 	mutex_lock(&vm->mm.mutex);
 	for (i = vm->fpde; i <= vm->lpde; i++) {
 		vm->map_pgt(pgd, i, vm->pgt[i - vm->fpde].obj);
-    if (shadow) {
-      vm->map_pgt(shadow, i, vm->pgt[i - vm->fpde].obj);
-    }
-  }
+		if (shadow) {
+			vm->map_pgt(shadow, i, vm->pgt[i - vm->fpde].obj);
+		}
+	}
 	list_add(&vpgd->head, &vm->pgd_list);
 	mutex_unlock(&vm->mm.mutex);
 	return 0;
@@ -460,9 +460,9 @@ nouveau_vm_unlink(struct nouveau_vm *vm, struct nouveau_gpuobj *mpgd, struct nou
 	mutex_unlock(&vm->mm.mutex);
 
 	nouveau_gpuobj_ref(NULL, &pgd);
-  if (shadow) {
-    nouveau_gpuobj_ref(NULL, &shadow);
-  }
+	if (shadow) {
+		nouveau_gpuobj_ref(NULL, &shadow);
+	}
 }
 
 static void

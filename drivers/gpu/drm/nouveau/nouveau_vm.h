@@ -38,7 +38,7 @@ struct nouveau_vm_pgt {
 struct nouveau_vm_pgd {
 	struct list_head head;
 	struct nouveau_gpuobj *obj;
-  struct nouveau_gpuobj *shadow;
+	struct nouveau_gpuobj *shadow;
 };
 
 struct nouveau_vma {
