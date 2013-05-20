@@ -589,6 +589,8 @@ nvc0_gpuobj_channel_init(struct nouveau_channel *chan, struct nouveau_vm *vm)
 	nv_wo32(chan->ramin, 0x0208, 0xffffffff);
 	nv_wo32(chan->ramin, 0x020c, 0x000000ff);
 
+	NV_INFO(dev, "shadow is used for %d\n", chan->id);
+
 	return 0;
 }
 
