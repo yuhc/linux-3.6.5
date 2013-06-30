@@ -33,7 +33,7 @@
 #include "nouveau_drv.h"
 #include "nouveau_para_virt.h"
 
-#define NOUVEAU_PARA_VIRT_REG_BAR
+#define NOUVEAU_PARA_VIRT_REG_BAR 4
 
 struct nouveau_para_virt_priv {
 	struct drm_device *dev;
