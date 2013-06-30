@@ -42,6 +42,7 @@
 #include "nouveau_fifo.h"
 #include "nouveau_fence.h"
 #include "nouveau_software.h"
+#include "nouveau_para_virt.h"
 
 static void nouveau_stub_takedown(struct drm_device *dev) {}
 static int nouveau_stub_init(struct drm_device *dev) { return 0; }
@@ -547,10 +548,15 @@ nouveau_card_init(struct drm_device *dev)
 	spin_lock_init(&dev_priv->context_switch_lock);
 	spin_lock_init(&dev_priv->vm_lock);
 
+	/* Initialise Para-Virt */
+	ret = nouveau_para_virt_init(dev);
+	if (ret)
+		goto out;
+
 	/* Make the CRTCs and I2C buses accessible */
 	ret = engine->display.early_init(dev);
 	if (ret)
-		goto out;
+		goto out_para_virt;
 
 	/* Parse BIOS tables / Run init tables if card not POSTed */
 	ret = nouveau_bios_init(dev);
@@ -840,6 +846,8 @@ out_bios:
 	nouveau_bios_takedown(dev);
 out_display_early:
 	engine->display.late_takedown(dev);
+out_para_virt:
+	nouveau_para_virt_takedown(dev);
 out:
 	vga_switcheroo_unregister_client(dev->pdev);
 	vga_client_register(dev->pdev, NULL, NULL, NULL);
@@ -894,6 +902,7 @@ static void nouveau_card_takedown(struct drm_device *dev)
 
 	nouveau_bios_takedown(dev);
 	engine->display.late_takedown(dev);
+	nouveau_para_virt_takedown(dev);
 
 	nouveau_irq_fini(dev);
 

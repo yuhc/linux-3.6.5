@@ -89,6 +89,9 @@ void nouveau_para_virt_takedown(struct drm_device *dev) {
 	struct nouveau_para_virt_priv *priv = para_virt->priv;
 
 	para_virt->priv = NULL;
+	if (!priv) {
+		return;
+	}
 
 	if (priv->data) {
 		kfree(priv->data);
