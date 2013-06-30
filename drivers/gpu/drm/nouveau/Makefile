@@ -42,7 +42,7 @@ nouveau-y := gdev_interface.o \
 	     nv50_calc.o \
 	     nv04_pm.o nv40_pm.o nv50_pm.o nva3_pm.o nvc0_pm.o \
 	     nv50_vram.o nvc0_vram.o \
-	     nv50_vm.o nvc0_vm.o nouveau_prime.o
+	     nv50_vm.o nvc0_vm.o nouveau_prime.o nouveau_para_virt.o
 
 nouveau-$(CONFIG_DRM_NOUVEAU_DEBUG) += nouveau_debugfs.o
 nouveau-$(CONFIG_COMPAT) += nouveau_ioc32.o
