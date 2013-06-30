@@ -549,15 +549,21 @@ struct nouveau_vram_engine {
 	bool (*flags_valid)(struct drm_device *, u32 tile_flags);
 };
 
+/* Added Para-Virt engine */
+struct nouveau_para_virt_engine {
+	void* priv;
+};
+
 struct nouveau_engine {
-	struct nouveau_instmem_engine instmem;
-	struct nouveau_mc_engine      mc;
-	struct nouveau_timer_engine   timer;
-	struct nouveau_fb_engine      fb;
-	struct nouveau_display_engine display;
-	struct nouveau_gpio_engine    gpio;
-	struct nouveau_pm_engine      pm;
-	struct nouveau_vram_engine    vram;
+	struct nouveau_instmem_engine   instmem;
+	struct nouveau_mc_engine        mc;
+	struct nouveau_timer_engine     timer;
+	struct nouveau_fb_engine        fb;
+	struct nouveau_display_engine   display;
+	struct nouveau_gpio_engine      gpio;
+	struct nouveau_pm_engine        pm;
+	struct nouveau_vram_engine      vram;
+	struct nouveau_para_virt_engine para_virt;
 };
 
 struct nouveau_pll_vals {
