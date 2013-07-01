@@ -93,14 +93,15 @@ void nouveau_para_virt_free_slot(struct drm_device *dev, u8 *slot) {
 int nouveau_para_virt_call(struct drm_device *dev, u8 *slot) {
 	struct drm_nouveau_private *dev_priv = dev->dev_private;
 	struct nouveau_para_virt_engine *engine = &dev_priv->engine.para_virt;
-	struct pci_dev *pdev = dev->pdev;
-	struct nouveau_para_virt_priv *priv = dev->priv;
+	struct nouveau_para_virt_priv *priv = engine->priv;
 	u32 pos = slot_pos(priv, slot);
 	unsigned long flags;
 
 	spin_lock_irqsave(&priv->lock, flags);
 	nvpv_wr32(priv, 0xc, pos);  // invoke A3 call
 	spin_unlock_irqrestore(&priv->lock, flags);
+
+	return 0;
 }
 
 int  nouveau_para_virt_init(struct drm_device *dev) {
