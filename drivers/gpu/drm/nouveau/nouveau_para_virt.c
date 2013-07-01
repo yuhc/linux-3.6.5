@@ -54,15 +54,18 @@ static inline void nvpv_wr32(struct nouveau_para_virt_engine *engine, unsigned r
 
 int  nouveau_para_virt_init(struct drm_device *dev) {
 	struct drm_nouveau_private *dev_priv = dev->dev_private;
-	struct nouveau_para_virt_engine *para_virt = &dev_priv->engine.para_virt;
+	struct nouveau_para_virt_engine *engine = &dev_priv->engine.para_virt;
 	struct pci_dev *pdev = dev->pdev;
 	struct nouveau_para_virt_priv *priv;
+	u64 address;
+
+	NV_INFO(dev, "para virt init start\n");
 
 	priv = kzalloc(sizeof(*priv), GFP_KERNEL);
 	if (!priv) {
 		return -ENOMEM;
 	}
-	para_virt->priv = priv;
+	engine->priv = priv;
 
 	priv->dev = dev;
 	spin_lock_init(&priv->lock);
@@ -77,18 +80,24 @@ int  nouveau_para_virt_init(struct drm_device *dev) {
 		return -ENODEV;
 	}
 
-	// TODO(Yusuke Suzuki):
 	// notify this physical address to A3
+	address = (u64)priv->mmio;
+	nvpv_wr32(engine, 0x4, lower_32_bits(address));
+	nvpv_wr32(engine, 0x8, upper_32_bits(address));
+	if (nvpv_rd32(engine, 0x0) != 0x0) {
+		return -ENODEV;
+	}
+	NV_INFO(dev, "para virt data address 0x%llx\n", address);
 
 	return 0;
 }
 
 void nouveau_para_virt_takedown(struct drm_device *dev) {
 	struct drm_nouveau_private *dev_priv = dev->dev_private;
-	struct nouveau_para_virt_engine *para_virt = &dev_priv->engine.para_virt;
-	struct nouveau_para_virt_priv *priv = para_virt->priv;
+	struct nouveau_para_virt_engine *engine = &dev_priv->engine.para_virt;
+	struct nouveau_para_virt_priv *priv = engine->priv;
 
-	para_virt->priv = NULL;
+	engine->priv = NULL;
 	if (!priv) {
 		return;
 	}
