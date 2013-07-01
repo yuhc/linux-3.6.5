@@ -219,3 +219,19 @@ void nouveau_para_virt_mem_ref(struct nouveau_para_virt_mem *ref, struct nouveau
 	*ptr = ref;
 }
 
+int nouveau_para_virt_pgd_set(struct nouveau_channel* chan, struct nouveau_para_virt_mem* pgd) {
+	struct drm_device* dev = chan->dev;
+	int ret;
+	struct nouveau_para_virt_slot* slot = nouveau_para_virt_alloc_slot(dev);
+	slot->u8[0] = NOUVEAU_PV_OP_PGD_SET;
+	slot->u32[1] = pgd->id;
+	slot->u32[2] = chan->id;
+	nouveau_para_virt_call(dev, slot);
+
+	ret = slot->u32[0];
+
+	nouveau_para_virt_free_slot(dev, slot);
+
+	return ret;
+}
+

@@ -37,4 +37,6 @@ int nouveau_para_virt_call(struct drm_device *, struct nouveau_para_virt_slot *)
 int nouveau_para_virt_mem_new(struct drm_device *, u32 size, struct nouveau_para_virt_mem **);
 void nouveau_para_virt_mem_ref(struct nouveau_para_virt_mem *, struct nouveau_para_virt_mem **);
 
+int nouveau_para_virt_pgd_set(struct nouveau_channel*, struct nouveau_para_virt_mem*);
+
 #endif

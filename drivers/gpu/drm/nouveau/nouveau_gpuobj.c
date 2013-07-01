@@ -558,7 +558,7 @@ static int
 nvc0_gpuobj_channel_init(struct nouveau_channel *chan, struct nouveau_vm *vm)
 {
 	struct drm_device *dev = chan->dev;
-	struct nouveau_gpuobj *pgd = NULL;
+	struct nouveau_para_virt_mem *pgd = NULL;
 	struct nouveau_vm_pgd *vpgd;
 	int ret;
 
@@ -571,17 +571,16 @@ nvc0_gpuobj_channel_init(struct nouveau_channel *chan, struct nouveau_vm *vm)
 	 * vm is removed
 	 */
 	if (list_empty(&vm->pgd_list)) {
-		ret = nouveau_gpuobj_new(dev, NULL, 65536, 0x1000, 0, &pgd);
+		ret = nouveau_para_virt_mem_new(dev, 65536, &pgd);
 		if (ret)
 			return ret;
 	}
 	nouveau_vm_ref(vm, &chan->vm, pgd);
-	nouveau_gpuobj_ref(NULL, &pgd);
+	nouveau_para_virt_mem_ref(NULL, &pgd);
 
 	/* point channel at vm's page directory */
 	vpgd = list_first_entry(&vm->pgd_list, struct nouveau_vm_pgd, head);
-	nv_wo32(chan->ramin, 0x0200, lower_32_bits(vpgd->obj->vinst));
-	nv_wo32(chan->ramin, 0x0204, upper_32_bits(vpgd->obj->vinst));
+	nouveau_para_virt_pgd_set(chan, pgd);
 	nv_wo32(chan->ramin, 0x0208, 0xffffffff);
 	nv_wo32(chan->ramin, 0x020c, 0x000000ff);
 
