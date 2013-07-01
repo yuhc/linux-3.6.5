@@ -70,9 +70,10 @@ int  nouveau_para_virt_init(struct drm_device *dev) {
 	priv->dev = dev;
 	spin_lock_init(&priv->lock);
 
-	if (!(priv->data = kzalloc(0x1000, GFP_KERNEL))) {
+	if (!(priv->data = kzalloc(0x1000 * 4, GFP_KERNEL))) {
 		return -ENOMEM;
 	}
+	((uint32_t*)priv->data)[0] = 0xdeadbeefUL;
 
 	// map BAR4
 	priv->mmio = ioremap(pci_resource_start(pdev, NOUVEAU_PARA_VIRT_REG_BAR), pci_resource_len(pdev, NOUVEAU_PARA_VIRT_REG_BAR));
