@@ -8,7 +8,9 @@
 
 /* PV OPS */
 enum {
-	NOUVEAU_PV_OP_PGD_SET,
+	NOUVEAU_PV_OP_SET_PGD,
+	NOUVEAU_PV_OP_MAP_PGT,
+	NOUVEAU_PV_OP_MAP,
 	NOUVEAU_PV_OP_MEM_ALLOC,
 };
 
@@ -37,6 +39,8 @@ int nouveau_para_virt_call(struct drm_device *, struct nouveau_para_virt_slot *)
 int nouveau_para_virt_mem_new(struct drm_device *, u32 size, struct nouveau_para_virt_mem **);
 void nouveau_para_virt_mem_ref(struct nouveau_para_virt_mem *, struct nouveau_para_virt_mem **);
 
-int nouveau_para_virt_pgd_set(struct nouveau_channel*, struct nouveau_para_virt_mem*);
+int nouveau_para_virt_set_pgd(struct nouveau_channel*, struct nouveau_para_virt_mem*);
+int nouvaeu_para_virt_map_pgt(struct nouveau_para_virt_mem *pgd, u32 index, struct nouveau_para_virt_mem *pgt[2]);
+int nouveau_para_virt_map(struct nouveau_para_virt_mem *pgt, u32 index, u64 phys);
 
 #endif

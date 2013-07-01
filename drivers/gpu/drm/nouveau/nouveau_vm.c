@@ -46,7 +46,7 @@ nouveau_vm_map_at(struct nouveau_vma *vma, u64 delta, struct nouveau_mem *node)
 		u32 num  = r->length >> bits;
 
 		while (num) {
-			struct nouveau_gpuobj *pgt = vm->pgt[pde].obj[big];
+			struct nouveau_para_virt_mem *pgt = vm->pgt[pde].obj[big];
 
 			end = (pte + num);
 			if (unlikely(end >= max))
@@ -94,7 +94,7 @@ nouveau_vm_map_sg_table(struct nouveau_vma *vma, u64 delta, u64 length,
 	struct scatterlist *sg;
 
 	for_each_sg(mem->sg->sgl, sg, mem->sg->nents, i) {
-		struct nouveau_gpuobj *pgt = vm->pgt[pde].obj[big];
+		struct nouveau_para_virt_mem *pgt = vm->pgt[pde].obj[big];
 		sglen = sg_dma_len(sg) >> PAGE_SHIFT;
 
 		end = pte + sglen;
@@ -149,7 +149,7 @@ nouveau_vm_map_sg(struct nouveau_vma *vma, u64 delta, u64 length,
 	u32 end, len;
 
 	while (num) {
-		struct nouveau_gpuobj *pgt = vm->pgt[pde].obj[big];
+		struct nouveau_para_virt_mem *pgt = vm->pgt[pde].obj[big];
 
 		end = (pte + num);
 		if (unlikely(end >= max))
@@ -184,7 +184,7 @@ nouveau_vm_unmap_at(struct nouveau_vma *vma, u64 delta, u64 length)
 	u32 end, len;
 
 	while (num) {
-		struct nouveau_gpuobj *pgt = vm->pgt[pde].obj[big];
+		struct nouveau_para_virt_mem *pgt = vm->pgt[pde].obj[big];
 
 		end = (pte + num);
 		if (unlikely(end >= max))
@@ -215,7 +215,7 @@ nouveau_vm_unmap_pgt(struct nouveau_vm *vm, int big, u32 fpde, u32 lpde)
 {
 	struct nouveau_vm_pgd *vpgd;
 	struct nouveau_vm_pgt *vpgt;
-	struct nouveau_gpuobj *pgt;
+	struct nouveau_para_virt_mem *pgt;
 	u32 pde;
 
 	for (pde = fpde; pde <= lpde; pde++) {
@@ -231,7 +231,7 @@ nouveau_vm_unmap_pgt(struct nouveau_vm *vm, int big, u32 fpde, u32 lpde)
 		}
 
 		mutex_unlock(&vm->mm.mutex);
-		nouveau_gpuobj_ref(NULL, &pgt);
+		nouveau_para_virt_mem_ref(NULL, &pgt);
 		mutex_lock(&vm->mm.mutex);
 	}
 }
@@ -241,7 +241,7 @@ nouveau_vm_map_pgt(struct nouveau_vm *vm, u32 pde, u32 type)
 {
 	struct nouveau_vm_pgt *vpgt = &vm->pgt[pde - vm->fpde];
 	struct nouveau_vm_pgd *vpgd;
-	struct nouveau_gpuobj *pgt;
+	struct nouveau_para_virt_mem *pgt;
 	int big = (type != vm->spg_shift);
 	u32 pgt_size;
 	int ret;
@@ -250,8 +250,7 @@ nouveau_vm_map_pgt(struct nouveau_vm *vm, u32 pde, u32 type)
 	pgt_size *= 8;
 
 	mutex_unlock(&vm->mm.mutex);
-	ret = nouveau_gpuobj_new(vm->dev, NULL, pgt_size, 0x1000,
-				 NVOBJ_FLAG_ZERO_ALLOC, &pgt);
+	ret = nouveau_para_virt_mem_new(vm->dev, pgt_size, &pgt);
 	mutex_lock(&vm->mm.mutex);
 	if (unlikely(ret))
 		return ret;
@@ -259,7 +258,7 @@ nouveau_vm_map_pgt(struct nouveau_vm *vm, u32 pde, u32 type)
 	/* someone beat us to filling the PDE while we didn't have the lock */
 	if (unlikely(vpgt->refcount[big]++)) {
 		mutex_unlock(&vm->mm.mutex);
-		nouveau_gpuobj_ref(NULL, &pgt);
+		nouveau_para_virt_mem_ref(NULL, &pgt);
 		mutex_lock(&vm->mm.mutex);
 		return 0;
 	}

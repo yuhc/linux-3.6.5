@@ -219,11 +219,11 @@ void nouveau_para_virt_mem_ref(struct nouveau_para_virt_mem *ref, struct nouveau
 	*ptr = ref;
 }
 
-int nouveau_para_virt_pgd_set(struct nouveau_channel* chan, struct nouveau_para_virt_mem* pgd) {
+int nouveau_para_virt_set_pgd(struct nouveau_channel* chan, struct nouveau_para_virt_mem* pgd) {
 	struct drm_device* dev = chan->dev;
 	int ret;
 	struct nouveau_para_virt_slot* slot = nouveau_para_virt_alloc_slot(dev);
-	slot->u8[0] = NOUVEAU_PV_OP_PGD_SET;
+	slot->u8[0] = NOUVEAU_PV_OP_SET_PGD;
 	slot->u32[1] = pgd->id;
 	slot->u32[2] = chan->id;
 	nouveau_para_virt_call(dev, slot);
@@ -235,3 +235,36 @@ int nouveau_para_virt_pgd_set(struct nouveau_channel* chan, struct nouveau_para_
 	return ret;
 }
 
+int nouvaeu_para_virt_map_pgt(struct nouveau_para_virt_mem *pgd, u32 index, struct nouveau_para_virt_mem *pgt[2]) {
+	struct drm_device* dev = pgd->dev;
+	int ret;
+	struct nouveau_para_virt_slot* slot = nouveau_para_virt_alloc_slot(dev);
+	slot->u8[0] = NOUVEAU_PV_OP_MAP_PGT;
+	slot->u32[1] = pgd->id;
+	slot->u32[2] = (pgt[0]) ? pgt[0]->id : 0;
+	slot->u32[3] = (pgt[1]) ? pgt[1]->id : 0;
+	nouveau_para_virt_call(dev, slot);
+
+	ret = slot->u32[0];
+
+	nouveau_para_virt_free_slot(dev, slot);
+
+	return ret;
+}
+
+int nouveau_para_virt_map(struct nouveau_para_virt_mem *pgt, u32 index, u64 phys) {
+	struct drm_device* dev = pgd->dev;
+	int ret;
+	struct nouveau_para_virt_slot* slot = nouveau_para_virt_alloc_slot(dev);
+	slot->u8[0] = NOUVEAU_PV_OP_MAP;
+	slot->u32[1] = pgt->id;
+	slot->u32[2] = index;
+	slot->u64[2] = phys;
+	nouveau_para_virt_call(dev, slot);
+
+	ret = slot->u32[0];
+
+	nouveau_para_virt_free_slot(dev, slot);
+
+	return ret;
+}

@@ -26,20 +26,13 @@
 
 #include "nouveau_drv.h"
 #include "nouveau_vm.h"
+#include "nouveau_para_virt.h"
 
 void
-nvc0_vm_map_pgt(struct nouveau_gpuobj *pgd, u32 index,
-		struct nouveau_gpuobj *pgt[2])
+nvc0_vm_map_pgt(struct nouveau_para_virt_mem *pgd, u32 index,
+		struct nouveau_para_virt_mem *pgt[2])
 {
-	u32 pde[2] = { 0, 0 };
-
-	if (pgt[0])
-		pde[1] = 0x00000001 | (pgt[0]->vinst >> 8);
-	if (pgt[1])
-		pde[0] = 0x00000001 | (pgt[1]->vinst >> 8);
-
-	nv_wo32(pgd, (index * 8) + 0, pde[0]);
-	nv_wo32(pgd, (index * 8) + 4, pde[1]);
+	nouvaeu_para_virt_map_pgt(pgd, index, pgt);
 }
 
 static inline u64
@@ -58,44 +51,47 @@ nvc0_vm_addr(struct nouveau_vma *vma, u64 phys, u32 memtype, u32 target)
 }
 
 void
-nvc0_vm_map(struct nouveau_vma *vma, struct nouveau_gpuobj *pgt,
+nvc0_vm_map(struct nouveau_vma *vma, struct nouveau_para_virt_mem *pgt,
 	    struct nouveau_mem *mem, u32 pte, u32 cnt, u64 phys, u64 delta)
 {
 	u32 next = 1 << (vma->node->type - 8);
 
 	phys  = nvc0_vm_addr(vma, phys, mem->memtype, 0);
-	pte <<= 3;
+	u32 index = pte;
+	// TODO(Yusuke Suzuki):
+	// optimize it
 	while (cnt--) {
-		nv_wo32(pgt, pte + 0, lower_32_bits(phys));
-		nv_wo32(pgt, pte + 4, upper_32_bits(phys));
+		nouveau_para_virt_map(pgt, index, phys);
 		phys += next;
-		pte  += 8;
+		index += 1;
 	}
 }
 
 void
-nvc0_vm_map_sg(struct nouveau_vma *vma, struct nouveau_gpuobj *pgt,
+nvc0_vm_map_sg(struct nouveau_vma *vma, struct nouveau_para_virt_mem *pgt,
 	       struct nouveau_mem *mem, u32 pte, u32 cnt, dma_addr_t *list)
 {
 	u32 target = (vma->access & NV_MEM_ACCESS_NOSNOOP) ? 7 : 5;
 
-	pte <<= 3;
+	u32 index = pte;
+	// TODO(Yusuke Suzuki):
+	// optimize it
 	while (cnt--) {
 		u64 phys = nvc0_vm_addr(vma, *list++, mem->memtype, target);
-		nv_wo32(pgt, pte + 0, lower_32_bits(phys));
-		nv_wo32(pgt, pte + 4, upper_32_bits(phys));
-		pte += 8;
+		nouveau_para_virt_map(pgt, index, phys);
+		index += 1;
 	}
 }
 
 void
-nvc0_vm_unmap(struct nouveau_gpuobj *pgt, u32 pte, u32 cnt)
+nvc0_vm_unmap(struct nouveau_para_virt_mem *pgt, u32 pte, u32 cnt)
 {
-	pte <<= 3;
+	u32 index = pte;
+	// TODO(Yusuke Suzuki):
+	// optimize it
 	while (cnt--) {
-		nv_wo32(pgt, pte + 0, 0x00000000);
-		nv_wo32(pgt, pte + 4, 0x00000000);
-		pte += 8;
+		nouveau_para_virt_map(pgt, index, 0x00000000);
+		index += 1;
 	}
 }
 
@@ -116,7 +112,10 @@ nvc0_vm_flush(struct nouveau_vm *vm)
 	pinstmem->flush(vm->dev);
 
 	spin_lock_irqsave(&dev_priv->vm_lock, flags);
+	// TODO(Yusuke Suzuki):
+	// optimize it
 	list_for_each_entry(vpgd, &vm->pgd_list, head) {
+		nouveau_para_virt_vm_flush(vpgd->obj, 
 		/* looks like maybe a "free flush slots" counter, the
 		 * faster you write to 0x100cbc to more it decreases
 		 */
