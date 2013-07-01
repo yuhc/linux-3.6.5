@@ -112,20 +112,6 @@ nvc0_vm_flush(struct nouveau_vm *vm)
 	// optimize it
 	list_for_each_entry(vpgd, &vm->pgd_list, head) {
 		nouveau_para_virt_vm_flush(vpgd->obj, engine);
-		/* looks like maybe a "free flush slots" counter, the
-		 * faster you write to 0x100cbc to more it decreases
-		 */
-		if (!nv_wait_ne(dev, 0x100c80, 0x00ff0000, 0x00000000)) {
-			NV_ERROR(dev, "vm timeout 0: 0x%08x %d\n",
-				 nv_rd32(dev, 0x100c80), engine);
-		}
-		nv_wr32(dev, 0x100cb8, vpgd->obj->vinst >> 8);
-		nv_wr32(dev, 0x100cbc, 0x80000000 | engine);
-		/* wait for flush to be queued? */
-		if (!nv_wait(dev, 0x100c80, 0x00008000, 0x00008000)) {
-			NV_ERROR(dev, "vm timeout 1: 0x%08x %d\n",
-				 nv_rd32(dev, 0x100c80), engine);
-		}
 	}
 	spin_unlock_irqrestore(&dev_priv->vm_lock, flags);
 }
