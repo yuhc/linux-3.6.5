@@ -348,21 +348,6 @@ nouveau_vm_new(struct drm_device *dev, u64 offset, u64 length, u64 mm_offset,
 	if (!vm)
 		return -ENOMEM;
 
-	if (dev_priv->card_type == NV_50) {
-		vm->map_pgt = nv50_vm_map_pgt;
-		vm->map = nv50_vm_map;
-		vm->map_sg = nv50_vm_map_sg;
-		vm->unmap = nv50_vm_unmap;
-		vm->flush = nv50_vm_flush;
-		vm->spg_shift = 12;
-		vm->lpg_shift = 16;
-
-		pgt_bits = 29;
-		block = (1 << pgt_bits);
-		if (length < block)
-			block = length;
-
-	} else
 	if (dev_priv->card_type >= NV_C0) {
 		vm->map_pgt = nvc0_vm_map_pgt;
 		vm->map = nvc0_vm_map;
