@@ -38,8 +38,8 @@
 struct nouveau_para_virt_priv {
 	struct drm_device *dev;
 	spinlock_t lock;
-	void __iomem *data;
-	void __iomem *mmio;
+	uint8_t __iomem *data;
+	uint8_t __iomem *mmio;
 };
 
 static inline u32 nvpv_rd32(struct nouveau_para_virt_engine *engine, unsigned reg) {
@@ -76,13 +76,13 @@ int  nouveau_para_virt_init(struct drm_device *dev) {
 	((uint32_t*)priv->data)[0] = 0xdeadbeefUL;
 
 	// map BAR4
-	priv->mmio = ioremap(pci_resource_start(pdev, NOUVEAU_PARA_VIRT_REG_BAR), pci_resource_len(pdev, NOUVEAU_PARA_VIRT_REG_BAR));
+	priv->mmio = (uint8_t __iomem *)ioremap(pci_resource_start(pdev, NOUVEAU_PARA_VIRT_REG_BAR), pci_resource_len(pdev, NOUVEAU_PARA_VIRT_REG_BAR));
 	if (!priv->mmio) {
 		return -ENODEV;
 	}
 
 	// notify this physical address to A3
-	address = (u64)priv->mmio;
+	address = (u64)priv->data;
 	nvpv_wr32(engine, 0x4, lower_32_bits(address));
 	nvpv_wr32(engine, 0x8, upper_32_bits(address));
 	if (nvpv_rd32(engine, 0x0) != 0x0) {
