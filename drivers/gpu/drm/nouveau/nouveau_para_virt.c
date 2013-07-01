@@ -74,10 +74,7 @@ u8* nouveau_para_virt_alloc_slot(struct drm_device *dev) {
 	down(&priv->sema);
 	spin_lock_irqsave(&priv->slot_lock, flags);
 
-	pos = fls64(priv->used_slot);
-	BUG_ON(pos == 0);
-
-	pos -= 1;
+	pos = fls64(priv->used_slot) - 1;
 	priv->used_slot |= ((0x1ULL) << pos);
 	ret = priv->slot + pos * NOUVEAU_PARA_VIRT_SLOT_SIZE;
 
