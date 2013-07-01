@@ -605,7 +605,7 @@ nouveau_gpuobj_channel_takedown(struct nouveau_channel *chan)
 	NV_DEBUG(chan->dev, "ch%d\n", chan->id);
 
 	nouveau_vm_ref(NULL, &chan->vm, chan->vm_pd);
-	nouveau_gpuobj_ref(NULL, &chan->vm_pd);
+	nouveau_para_virt_mem_ref(NULL, &chan->vm_pd);
 
 	if (drm_mm_initialized(&chan->ramin_heap))
 		drm_mm_takedown(&chan->ramin_heap);

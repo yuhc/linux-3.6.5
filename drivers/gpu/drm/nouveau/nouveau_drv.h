@@ -73,6 +73,8 @@ struct nouveau_mem;
 #define NOUVEAU_MAX_CHANNEL_NR 4096
 #define NOUVEAU_MAX_TILE_NR 15
 
+struct nouveau_para_virt_mem;
+
 struct nouveau_mem {
 	struct drm_device *dev;
 
@@ -258,7 +260,7 @@ struct nouveau_channel {
 
 	/* NV50 VM */
 	struct nouveau_vm     *vm;
-	struct nouveau_gpuobj *vm_pd;
+	struct nouveau_para_virt_mem *vm_pd;
 
 	/* Objects */
 	struct nouveau_gpuobj *ramin; /* Private instmem */

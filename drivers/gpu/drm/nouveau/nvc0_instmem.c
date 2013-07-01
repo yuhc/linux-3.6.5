@@ -26,11 +26,12 @@
 
 #include "nouveau_drv.h"
 #include "nouveau_vm.h"
+#include "nouveau_para_virt.h"
 
 struct nvc0_instmem_priv {
-	struct nouveau_gpuobj  *bar1_pgd;
+	struct nouveau_para_virt_mem *bar1_pgd;
 	struct nouveau_channel *bar1;
-	struct nouveau_gpuobj  *bar3_pgd;
+	struct nouveau_para_virt_mem *bar3_pgd;
 	struct nouveau_channel *bar3;
 };
 
@@ -75,7 +76,7 @@ nvc0_channel_del(struct nouveau_channel **pchan)
 static int
 nvc0_channel_new(struct drm_device *dev, u32 size, struct nouveau_vm *vm,
 		 struct nouveau_channel **pchan,
-		 struct nouveau_gpuobj *pgd, u64 vm_size)
+		 struct nouveau_para_virt_mem *pgd, u64 vm_size)
 {
 	struct nouveau_channel *chan;
 	int ret;
@@ -103,8 +104,7 @@ nvc0_channel_new(struct drm_device *dev, u32 size, struct nouveau_vm *vm,
 		return ret;
 	}
 
-	nv_wo32(chan->ramin, 0x0200, lower_32_bits(pgd->vinst));
-	nv_wo32(chan->ramin, 0x0204, upper_32_bits(pgd->vinst));
+	nouveau_para_virt_set_pgd(chan, pgd);
 	nv_wo32(chan->ramin, 0x0208, lower_32_bits(vm_size - 1));
 	nv_wo32(chan->ramin, 0x020c, upper_32_bits(vm_size - 1));
 
@@ -133,19 +133,14 @@ nvc0_instmem_init(struct drm_device *dev)
 	if (ret)
 		goto error;
 
-	ret = nouveau_gpuobj_new(dev, NULL,
-				 (pci_resource_len(pdev, 3) >> 12) * 8, 0,
-				 NVOBJ_FLAG_DONT_MAP |
-				 NVOBJ_FLAG_ZERO_ALLOC,
-				 &dev_priv->bar3_vm->pgt[0].obj[0]);
+	ret = nouveau_para_virt_mem_new(dev, (pci_resource_len(pdev, 3) >> 12) * 8, 0, &dev_priv->bar3_vm->pgt[0].obj[0]);
 	if (ret)
 		goto error;
 	dev_priv->bar3_vm->pgt[0].refcount[0] = 1;
 
 	nv50_instmem_map(dev_priv->bar3_vm->pgt[0].obj[0]);
 
-	ret = nouveau_gpuobj_new(dev, NULL, 0x8000, 4096,
-				 NVOBJ_FLAG_ZERO_ALLOC, &priv->bar3_pgd);
+	ret = nouveau_para_virt_mem_new(dev, 0x8000, &priv->bar3_pgd);
 	if (ret)
 		goto error;
 
@@ -164,8 +159,7 @@ nvc0_instmem_init(struct drm_device *dev)
 	if (ret)
 		goto error;
 
-	ret = nouveau_gpuobj_new(dev, NULL, 0x8000, 4096,
-				 NVOBJ_FLAG_ZERO_ALLOC, &priv->bar1_pgd);
+	ret = nouveau_para_virt_mem_new(dev, 0x8000, &priv->bar1_pgd);
 	if (ret)
 		goto error;
 
@@ -208,13 +202,13 @@ nvc0_instmem_takedown(struct drm_device *dev)
 
 	nvc0_channel_del(&priv->bar1);
 	nouveau_vm_ref(NULL, &dev_priv->bar1_vm, priv->bar1_pgd);
-	nouveau_gpuobj_ref(NULL, &priv->bar1_pgd);
+	nouveau_para_virt_mem_ref(NULL, &priv->bar1_pgd);
 
 	nvc0_channel_del(&priv->bar3);
 	nouveau_vm_ref(dev_priv->bar3_vm, &vm, NULL);
 	nouveau_vm_ref(NULL, &vm, priv->bar3_pgd);
-	nouveau_gpuobj_ref(NULL, &priv->bar3_pgd);
-	nouveau_gpuobj_ref(NULL, &dev_priv->bar3_vm->pgt[0].obj[0]);
+	nouveau_para_virt_mem_ref(NULL, &priv->bar3_pgd);
+	nouveau_para_virt_mem_ref(NULL, &dev_priv->bar3_vm->pgt[0].obj[0]);
 	nouveau_vm_ref(NULL, &dev_priv->bar3_vm, NULL);
 
 	dev_priv->engine.instmem.priv = NULL;
