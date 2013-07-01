@@ -82,7 +82,7 @@ int  nouveau_para_virt_init(struct drm_device *dev) {
 	}
 
 	// notify this physical address to A3
-	address = (u64)priv->data;
+	address = __pa(priv->data);  // convert kmalloc-ed virt to phys
 	nvpv_wr32(engine, 0x4, lower_32_bits(address));
 	nvpv_wr32(engine, 0x8, upper_32_bits(address));
 	if (nvpv_rd32(engine, 0x0) != 0x0) {
