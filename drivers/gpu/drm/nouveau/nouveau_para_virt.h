@@ -30,6 +30,8 @@ struct nouveau_para_virt_mem {
 	u32 size;
 };
 
+struct nouveau_channel;
+
 int  nouveau_para_virt_init(struct drm_device *);
 void nouveau_para_virt_takedown(struct drm_device *);
 struct nouveau_para_virt_slot* nouveau_para_virt_alloc_slot(struct drm_device *);
