@@ -89,7 +89,7 @@ nv50_instmem_takedown(struct drm_device *dev)
 	dev_priv->channels.ptr[127] = 0;
 	nv50_channel_del(&dev_priv->channels.ptr[0]);
 
-	nouveau_gpuobj_ref(NULL, &dev_priv->bar3_vm->pgt[0].obj[0]);
+	nouveau_para_virt_mem_ref(NULL, &dev_priv->bar3_vm->pgt[0].obj[0]);
 	nouveau_vm_ref(NULL, &dev_priv->bar3_vm, NULL);
 
 	if (drm_mm_initialized(&dev_priv->ramin_heap))

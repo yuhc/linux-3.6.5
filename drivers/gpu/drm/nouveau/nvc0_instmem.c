@@ -133,7 +133,7 @@ nvc0_instmem_init(struct drm_device *dev)
 	if (ret)
 		goto error;
 
-	ret = nouveau_para_virt_mem_new(dev, (pci_resource_len(pdev, 3) >> 12) * 8, 0, &dev_priv->bar3_vm->pgt[0].obj[0]);
+	ret = nouveau_para_virt_mem_new(dev, (pci_resource_len(pdev, 3) >> 12) * 8, &dev_priv->bar3_vm->pgt[0].obj[0]);
 	if (ret)
 		goto error;
 	dev_priv->bar3_vm->pgt[0].refcount[0] = 1;
