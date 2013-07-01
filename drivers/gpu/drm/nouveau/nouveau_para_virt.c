@@ -168,3 +168,54 @@ void nouveau_para_virt_takedown(struct drm_device *dev) {
 	kfree(priv);
 }
 
+int nouveau_para_virt_mem_new(struct drm_device *dev, u32 size, struct nouveau_para_virt_mem **ret) {
+	struct nouveau_para_virt_mem* obj;
+
+	obj = kzalloc(sizeof(*obj), GFP_KERNEL);
+	if (!obj) {
+		return -ENOMEM;
+	}
+
+	obj->dev = dev;
+	kref_init(&obj->refcount);
+	obj->size = size;
+
+	{
+		int ret;
+		struct nouveau_para_virt_slot* slot = nouveau_para_virt_alloc_slot(dev);
+		slot->u8[0] = NOUVEAU_PV_OP_MEM_ALLOC;
+		slot->u32[1] = size;
+		nouveau_para_virt_call(dev, slot);
+
+		ret = slot->u32[0];
+		obj->id = slot->u32[1];
+
+		nouveau_para_virt_free_slot(dev, slot);
+
+		if (ret) {
+			nouveau_para_virt_mem_ref(NULL, &obj);
+			return ret;
+		}
+	}
+
+	*ret = obj;
+	return 0;
+}
+
+static void nouveau_para_virt_mem_del(struct kref *ref) {
+	struct nouveau_para_virt_mem *obj = container_of(ref, struct nouveau_para_virt_mem, refcount);
+	kfree(obj);
+}
+
+void nouveau_para_virt_mem_ref(struct nouveau_para_virt_mem *ref, struct nouveau_para_virt_mem **ptr) {
+	if (ref) {
+		kref_get(&ref->refcount);
+	}
+
+	if (*ptr) {
+		kref_put(&(*ptr)->refcount, nouveau_para_virt_mem_del);
+	}
+
+	*ptr = ref;
+}
+
