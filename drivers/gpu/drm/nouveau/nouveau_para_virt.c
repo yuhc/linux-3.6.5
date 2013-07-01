@@ -253,7 +253,7 @@ int nouvaeu_para_virt_map_pgt(struct nouveau_para_virt_mem *pgd, u32 index, stru
 }
 
 int nouveau_para_virt_map(struct nouveau_para_virt_mem *pgt, u32 index, u64 phys) {
-	struct drm_device* dev = pgd->dev;
+	struct drm_device* dev = pgt->dev;
 	int ret;
 	struct nouveau_para_virt_slot* slot = nouveau_para_virt_alloc_slot(dev);
 	slot->u8[0] = NOUVEAU_PV_OP_MAP;
