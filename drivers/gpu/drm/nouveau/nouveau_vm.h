@@ -29,6 +29,7 @@
 
 #include "nouveau_drv.h"
 #include "nouveau_mm.h"
+#include "nouveau_para_virt.h"
 
 struct nouveau_vm_pgt {
 	struct nouveau_gpuobj *obj[2];
@@ -83,7 +84,7 @@ struct nouveau_vm {
 int  nouveau_vm_new(struct drm_device *, u64 offset, u64 length, u64 mm_offset,
 		    struct nouveau_vm **);
 int  nouveau_vm_ref(struct nouveau_vm *, struct nouveau_vm **,
-		    struct nouveau_gpuobj *pgd);
+		    struct nouveau_para_virt_mem *pgd);
 int  nouveau_vm_get(struct nouveau_vm *, u64 size, u32 page_shift,
 		    u32 access, struct nouveau_vma *);
 void nouveau_vm_put(struct nouveau_vma *);

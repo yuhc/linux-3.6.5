@@ -404,7 +404,7 @@ nouveau_vm_new(struct drm_device *dev, u64 offset, u64 length, u64 mm_offset,
 }
 
 static int
-nouveau_vm_link(struct nouveau_vm *vm, struct nouveau_gpuobj *pgd)
+nouveau_vm_link(struct nouveau_vm *vm, struct nouveau_para_virt_mem *pgd)
 {
 	struct nouveau_vm_pgd *vpgd;
 	int i;
@@ -416,9 +416,11 @@ nouveau_vm_link(struct nouveau_vm *vm, struct nouveau_gpuobj *pgd)
 	if (!vpgd)
 		return -ENOMEM;
 
-	nouveau_gpuobj_ref(pgd, &vpgd->obj);
+	nouveau_para_virt_mem_ref(pgd, &vpgd->obj);
 
 	mutex_lock(&vm->mm.mutex);
+	// TODO(Yusuke Suzuki):
+	// Optimize it
 	for (i = vm->fpde; i <= vm->lpde; i++)
 		vm->map_pgt(pgd, i, vm->pgt[i - vm->fpde].obj);
 	list_add(&vpgd->head, &vm->pgd_list);
@@ -427,10 +429,10 @@ nouveau_vm_link(struct nouveau_vm *vm, struct nouveau_gpuobj *pgd)
 }
 
 static void
-nouveau_vm_unlink(struct nouveau_vm *vm, struct nouveau_gpuobj *mpgd)
+nouveau_vm_unlink(struct nouveau_vm *vm, struct nouveau_para_virt_mem *mpgd)
 {
 	struct nouveau_vm_pgd *vpgd, *tmp;
-	struct nouveau_gpuobj *pgd = NULL;
+	struct nouveau_para_virt_mem *pgd = NULL;
 
 	if (!mpgd)
 		return;
@@ -446,7 +448,7 @@ nouveau_vm_unlink(struct nouveau_vm *vm, struct nouveau_gpuobj *mpgd)
 	}
 	mutex_unlock(&vm->mm.mutex);
 
-	nouveau_gpuobj_ref(NULL, &pgd);
+	nouveau_para_virt_mem_ref(NULL, &pgd);
 }
 
 static void
@@ -465,7 +467,7 @@ nouveau_vm_del(struct nouveau_vm *vm)
 
 int
 nouveau_vm_ref(struct nouveau_vm *ref, struct nouveau_vm **ptr,
-	       struct nouveau_gpuobj *pgd)
+	       struct nouveau_para_virt_mem *pgd)
 {
 	struct nouveau_vm *vm;
 	int ret;
