@@ -77,7 +77,7 @@ struct nouveau_para_virt_slot* nouveau_para_virt_alloc_slot(struct drm_device *d
 	return (struct nouveau_para_virt_slot*)ret;
 }
 
-void nouveau_para_virt_free_slot(struct drm_device *dev, struct noueau_para_virt_slot *slot) {
+void nouveau_para_virt_free_slot(struct drm_device *dev, struct nouveau_para_virt_slot *slot) {
 	struct drm_nouveau_private *dev_priv = dev->dev_private;
 	struct nouveau_para_virt_engine *engine = &dev_priv->engine.para_virt;
 	struct nouveau_para_virt_priv *priv = engine->priv;
