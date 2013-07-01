@@ -38,6 +38,7 @@
 #include "nouveau_ramht.h"
 #include "nouveau_software.h"
 #include "nouveau_vm.h"
+#include "nouveau_para_virt.h"
 
 struct nouveau_gpuobj_method {
 	struct list_head head;

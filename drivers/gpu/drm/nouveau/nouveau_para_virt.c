@@ -38,9 +38,9 @@ struct nouveau_para_virt_priv {
 	struct drm_device *dev;
 	spinlock_t lock;
 	spinlock_t slot_lock;
-	uint8_t __iomem *slot;
-	uint8_t __iomem *mmio;
-	uint64_t used_slot;
+	u8 __iomem *slot;
+	u8 __iomem *mmio;
+	u64 used_slot;
 	struct semaphore sema;
 };
 
@@ -52,11 +52,11 @@ static inline void nvpv_wr32(struct nouveau_para_virt_priv *priv, unsigned reg, 
 	iowrite32_native(val, priv->mmio + reg);
 }
 
-static inline u32 slot_pos(struct nouveau_para_virt_priv *priv, u8 *slot) {
-	return (slot - priv->slot) / NOUVEAU_PARA_VIRT_SLOT_SIZE;
+static inline u32 slot_pos(struct nouveau_para_virt_priv *priv, struct nouveau_para_virt_slot *slot) {
+	return (slot->u8 - priv->slot) / NOUVEAU_PV_SLOT_SIZE;
 }
 
-u8* nouveau_para_virt_alloc_slot(struct drm_device *dev) {
+struct nouveau_para_virt_slot* nouveau_para_virt_alloc_slot(struct drm_device *dev) {
 	struct drm_nouveau_private *dev_priv = dev->dev_private;
 	struct nouveau_para_virt_engine *engine = &dev_priv->engine.para_virt;
 	struct nouveau_para_virt_priv *priv = engine->priv;
@@ -70,14 +70,14 @@ u8* nouveau_para_virt_alloc_slot(struct drm_device *dev) {
 
 	pos = fls64(priv->used_slot) - 1;
 	priv->used_slot |= ((0x1ULL) << pos);
-	ret = priv->slot + pos * NOUVEAU_PARA_VIRT_SLOT_SIZE;
+	ret = priv->slot + pos * NOUVEAU_PV_SLOT_SIZE;
 
 	spin_unlock_irqrestore(&priv->slot_lock, flags);
 
-	return ret;
+	return (struct nouveau_para_virt_slot*)ret;
 }
 
-void nouveau_para_virt_free_slot(struct drm_device *dev, u8 *slot) {
+void nouveau_para_virt_free_slot(struct drm_device *dev, struct noueau_para_virt_slot *slot) {
 	struct drm_nouveau_private *dev_priv = dev->dev_private;
 	struct nouveau_para_virt_engine *engine = &dev_priv->engine.para_virt;
 	struct nouveau_para_virt_priv *priv = engine->priv;
@@ -90,7 +90,7 @@ void nouveau_para_virt_free_slot(struct drm_device *dev, u8 *slot) {
 	up(&priv->sema);
 }
 
-int nouveau_para_virt_call(struct drm_device *dev, u8 *slot) {
+int nouveau_para_virt_call(struct drm_device *dev, struct nouveau_para_virt_slot *slot) {
 	struct drm_nouveau_private *dev_priv = dev->dev_private;
 	struct nouveau_para_virt_engine *engine = &dev_priv->engine.para_virt;
 	struct nouveau_para_virt_priv *priv = engine->priv;
@@ -123,15 +123,15 @@ int  nouveau_para_virt_init(struct drm_device *dev) {
 	priv->used_slot = ~(0ULL);
 	spin_lock_init(&priv->slot_lock);
 	spin_lock_init(&priv->lock);
-	sema_init(&priv->sema, NOUVEAU_PARA_VIRT_SLOT_NUM);
+	sema_init(&priv->sema, NOUVEAU_PV_SLOT_NUM);
 
-	if (!(priv->slot = kzalloc(NOUVEAU_PARA_VIRT_SLOT_TOTAL, GFP_KERNEL))) {
+	if (!(priv->slot = kzalloc(NOUVEAU_PV_SLOT_TOTAL, GFP_KERNEL))) {
 		return -ENOMEM;
 	}
-	((uint32_t*)priv->slot)[0] = 0xdeadbeefUL;
+	((u32*)priv->slot)[0] = 0xdeadbeefUL;
 
 	// map BAR4
-	priv->mmio = (uint8_t __iomem *)ioremap(pci_resource_start(pdev, NOUVEAU_PARA_VIRT_REG_BAR), pci_resource_len(pdev, NOUVEAU_PARA_VIRT_REG_BAR));
+	priv->mmio = (u8 __iomem *)ioremap(pci_resource_start(pdev, NOUVEAU_PV_REG_BAR), pci_resource_len(pdev, NOUVEAU_PV_REG_BAR));
 	if (!priv->mmio) {
 		return -ENODEV;
 	}
