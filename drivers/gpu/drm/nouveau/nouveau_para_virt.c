@@ -81,6 +81,7 @@ void nouveau_para_virt_free_slot(struct drm_device *dev, u8 *slot) {
 	struct drm_nouveau_private *dev_priv = dev->dev_private;
 	struct nouveau_para_virt_engine *engine = &dev_priv->engine.para_virt;
 	struct nouveau_para_virt_priv *priv = engine->priv;
+	unsigned long flags;
 	u32 pos = slot_pos(priv, slot);
 
 	spin_lock_irqsave(&priv->slot_lock, flags);
