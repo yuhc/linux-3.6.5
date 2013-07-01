@@ -115,7 +115,7 @@ nvc0_vm_flush(struct nouveau_vm *vm)
 	// TODO(Yusuke Suzuki):
 	// optimize it
 	list_for_each_entry(vpgd, &vm->pgd_list, head) {
-		nouveau_para_virt_vm_flush(vpgd->obj, 
+		nouveau_para_virt_vm_flush(vpgd->obj, engine);
 		/* looks like maybe a "free flush slots" counter, the
 		 * faster you write to 0x100cbc to more it decreases
 		 */

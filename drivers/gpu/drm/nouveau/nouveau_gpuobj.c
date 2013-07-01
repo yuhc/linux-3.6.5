@@ -595,9 +595,6 @@ nouveau_gpuobj_channel_init(struct nouveau_channel *chan,
 	struct drm_nouveau_private *dev_priv = dev->dev_private;
 	struct nouveau_fpriv *fpriv = nouveau_fpriv(chan->file_priv);
 	struct nouveau_vm *vm = fpriv ? fpriv->vm : dev_priv->chan_vm;
-	struct nouveau_gpuobj *vram = NULL, *tt = NULL;
-	int ret;
-
 	NV_DEBUG(dev, "ch%d vram=0x%08x tt=0x%08x\n", chan->id, vram_h, tt_h);
 	return nvc0_gpuobj_channel_init(chan, vm);
 }
