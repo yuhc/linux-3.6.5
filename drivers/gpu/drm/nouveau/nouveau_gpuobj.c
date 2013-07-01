@@ -513,48 +513,6 @@ nouveau_gpuobj_gr_new(struct nouveau_channel *chan, u32 handle, int class)
 }
 
 static int
-nouveau_gpuobj_channel_init_pramin(struct nouveau_channel *chan)
-{
-	struct drm_device *dev = chan->dev;
-	struct drm_nouveau_private *dev_priv = dev->dev_private;
-	uint32_t size;
-	uint32_t base;
-	int ret;
-
-	NV_DEBUG(dev, "ch%d\n", chan->id);
-
-	/* Base amount for object storage (4KiB enough?) */
-	size = 0x2000;
-	base = 0;
-
-	if (dev_priv->card_type == NV_50) {
-		/* Various fixed table thingos */
-		size += 0x1400; /* mostly unknown stuff */
-		size += 0x4000; /* vm pd */
-		base  = 0x6000;
-		/* RAMHT, not sure about setting size yet, 32KiB to be safe */
-		size += 0x8000;
-		/* RAMFC */
-		size += 0x1000;
-	}
-
-	ret = nouveau_gpuobj_new(dev, NULL, size, 0x1000, 0, &chan->ramin);
-	if (ret) {
-		NV_ERROR(dev, "Error allocating channel PRAMIN: %d\n", ret);
-		return ret;
-	}
-
-	ret = drm_mm_init(&chan->ramin_heap, base, size - base);
-	if (ret) {
-		NV_ERROR(dev, "Error creating PRAMIN heap: %d\n", ret);
-		nouveau_gpuobj_ref(NULL, &chan->ramin);
-		return ret;
-	}
-
-	return 0;
-}
-
-static int
 nvc0_gpuobj_channel_init(struct nouveau_channel *chan, struct nouveau_vm *vm)
 {
 	struct drm_device *dev = chan->dev;
