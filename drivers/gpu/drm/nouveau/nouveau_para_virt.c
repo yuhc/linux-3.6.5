@@ -204,6 +204,14 @@ int nouveau_para_virt_mem_new(struct drm_device *dev, u32 size, struct nouveau_p
 
 static void nouveau_para_virt_mem_del(struct kref *ref) {
 	struct nouveau_para_virt_mem *obj = container_of(ref, struct nouveau_para_virt_mem, refcount);
+	{
+		int ret;
+		struct nouveau_para_virt_slot* slot = nouveau_para_virt_alloc_slot(dev);
+		slot->u8[0] = NOUVEAU_PV_OP_MEM_FREE;
+		slot->u32[1] = obj->id;
+		nouveau_para_virt_call(dev, slot);
+		nouveau_para_virt_free_slot(dev, slot);
+	}
 	kfree(obj);
 }
 
@@ -243,6 +251,7 @@ int nouvaeu_para_virt_map_pgt(struct nouveau_para_virt_mem *pgd, u32 index, stru
 	slot->u32[1] = pgd->id;
 	slot->u32[2] = (pgt[0]) ? pgt[0]->id : 0;
 	slot->u32[3] = (pgt[1]) ? pgt[1]->id : 0;
+	slot->u32[4] = index;
 	nouveau_para_virt_call(dev, slot);
 
 	ret = slot->u32[0];

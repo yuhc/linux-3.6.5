@@ -13,6 +13,7 @@ enum {
 	NOUVEAU_PV_OP_MAP,
 	NOUVEAU_PV_OP_VM_FLUSH,
 	NOUVEAU_PV_OP_MEM_ALLOC,
+	NOUVEAU_PV_OP_MEM_FREE,
 };
 
 struct nouveau_para_virt_slot {
