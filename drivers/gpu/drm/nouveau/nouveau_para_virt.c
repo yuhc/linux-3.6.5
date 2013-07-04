@@ -69,7 +69,7 @@ struct nouveau_para_virt_slot* nouveau_para_virt_alloc_slot(struct drm_device *d
 	spin_lock_irqsave(&priv->slot_lock, flags);
 
 	pos = fls64(priv->used_slot) - 1;
-	priv->used_slot |= ((0x1ULL) << pos);
+	priv->used_slot &= ~((0x1ULL) << pos);
 	ret = priv->slot + pos * NOUVEAU_PV_SLOT_SIZE;
 
 	spin_unlock_irqrestore(&priv->slot_lock, flags);
@@ -86,7 +86,7 @@ void nouveau_para_virt_free_slot(struct drm_device *dev, struct nouveau_para_vir
 	u32 pos = slot_pos(priv, slot);
 
 	spin_lock_irqsave(&priv->slot_lock, flags);
-	priv->used_slot &= ~((0x1ULL) << pos);
+	priv->used_slot |= ((0x1ULL) << pos);
 	spin_unlock_irqrestore(&priv->slot_lock, flags);
 	up(&priv->sema);
 	NV_INFO(dev, "free virt space 0x%llx pos %u", (u64)(slot), pos);
