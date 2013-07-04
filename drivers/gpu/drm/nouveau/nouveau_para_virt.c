@@ -295,7 +295,7 @@ int nouveau_para_virt_vm_flush(struct nouveau_para_virt_mem *pgd, u32 engine) {
 }
 
 int nouveau_para_virt_bar3_pgt(struct nouveau_para_virt_mem *pgt) {
-	struct drm_device* dev = pgd->dev;
+	struct drm_device* dev = pgt->dev;
 	int ret;
 	struct nouveau_para_virt_slot* slot = nouveau_para_virt_alloc_slot(dev);
 	slot->u8[0] = NOUVEAU_PV_OP_BAR3_PGT;
