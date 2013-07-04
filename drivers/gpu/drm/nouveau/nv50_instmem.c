@@ -31,11 +31,6 @@
 #include "nouveau_drv.h"
 #include "nouveau_vm.h"
 
-#define BAR1_VM_BASE 0x0020000000ULL
-#define BAR1_VM_SIZE pci_resource_len(dev->pdev, 1)
-#define BAR3_VM_BASE 0x0000000000ULL
-#define BAR3_VM_SIZE pci_resource_len(dev->pdev, 3)
-
 struct nv50_instmem_priv {
 	uint32_t save1700[5]; /* 0x1700->0x1710 */
 
