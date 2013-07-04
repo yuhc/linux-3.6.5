@@ -74,6 +74,7 @@ struct nouveau_para_virt_slot* nouveau_para_virt_alloc_slot(struct drm_device *d
 
 	spin_unlock_irqrestore(&priv->slot_lock, flags);
 
+	NV_INFO("alloc virt space 0x%llx pos %u", (u64)(ret), pos);
 	return (struct nouveau_para_virt_slot*)ret;
 }
 
