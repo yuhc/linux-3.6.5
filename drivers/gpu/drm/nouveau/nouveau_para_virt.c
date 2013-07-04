@@ -74,7 +74,7 @@ struct nouveau_para_virt_slot* nouveau_para_virt_alloc_slot(struct drm_device *d
 
 	spin_unlock_irqrestore(&priv->slot_lock, flags);
 
-	NV_INFO(dev, "alloc virt space 0x%llx pos %u", (u64)(ret), pos);
+	// NV_INFO(dev, "alloc virt space 0x%llx pos %u\n", (u64)(ret), pos);
 	return (struct nouveau_para_virt_slot*)ret;
 }
 
@@ -89,7 +89,7 @@ void nouveau_para_virt_free_slot(struct drm_device *dev, struct nouveau_para_vir
 	priv->used_slot |= ((0x1ULL) << pos);
 	spin_unlock_irqrestore(&priv->slot_lock, flags);
 	up(&priv->sema);
-	NV_INFO(dev, "free virt space 0x%llx pos %u", (u64)(slot), pos);
+	// NV_INFO(dev, "free virt space 0x%llx pos %u\n", (u64)(slot), pos);
 }
 
 int nouveau_para_virt_call(struct drm_device *dev, struct nouveau_para_virt_slot *slot) {
