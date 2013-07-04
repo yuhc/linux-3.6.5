@@ -44,7 +44,7 @@ int nouveau_para_virt_call(struct drm_device *, struct nouveau_para_virt_slot *)
 int nouveau_para_virt_mem_new(struct drm_device *, u32 size, struct nouveau_para_virt_mem **);
 void nouveau_para_virt_mem_ref(struct nouveau_para_virt_mem *, struct nouveau_para_virt_mem **);
 
-int nouveau_para_virt_set_pgd(struct nouveau_channel*, struct nouveau_para_virt_mem*);
+int nouveau_para_virt_set_pgd(struct nouveau_channel*, struct nouveau_para_virt_mem*, int id);
 int nouvaeu_para_virt_map_pgt(struct nouveau_para_virt_mem *pgd, u32 index, struct nouveau_para_virt_mem *pgt[2]);
 int nouveau_para_virt_map(struct nouveau_para_virt_mem *pgt, u32 index, u64 phys);
 int nouveau_para_virt_vm_flush(struct nouveau_para_virt_mem* pgd, u32 engine);
