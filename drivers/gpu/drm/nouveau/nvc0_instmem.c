@@ -151,7 +151,7 @@ nvc0_instmem_init(struct drm_device *dev)
 	nouveau_vm_ref(NULL, &vm, NULL);
 
 	ret = nvc0_channel_new(dev, 8192, dev_priv->bar3_vm, &priv->bar3,
-			       priv->bar3_pgd, pci_resource_len(dev->pdev, 3), 3);
+			       priv->bar3_pgd, pci_resource_len(dev->pdev, 3), -3);
 	if (ret)
 		goto error;
 
@@ -170,7 +170,7 @@ nvc0_instmem_init(struct drm_device *dev)
 	nouveau_vm_ref(NULL, &vm, NULL);
 
 	ret = nvc0_channel_new(dev, 8192, dev_priv->bar1_vm, &priv->bar1,
-			       priv->bar1_pgd, pci_resource_len(dev->pdev, 1), 1);
+			       priv->bar1_pgd, pci_resource_len(dev->pdev, 1), -1);
 	if (ret)
 		goto error;
 
