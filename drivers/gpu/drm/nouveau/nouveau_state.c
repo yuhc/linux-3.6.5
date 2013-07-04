@@ -285,51 +285,15 @@ nouveau_card_init(struct drm_device *dev)
 
 	if (!dev_priv->noaccel) {
 		switch (dev_priv->card_type) {
-		case NV_04:
-			nv04_fifo_create(dev);
-			break;
-		case NV_10:
-		case NV_20:
-		case NV_30:
-			if (dev_priv->chipset < 0x17)
-				nv10_fifo_create(dev);
-			else
-				nv17_fifo_create(dev);
-			break;
-		case NV_40:
-			nv40_fifo_create(dev);
-			break;
-		case NV_50:
-			if (dev_priv->chipset == 0x50)
-				nv50_fifo_create(dev);
-			else
-				nv84_fifo_create(dev);
-			break;
 		case NV_C0:
 		case NV_D0:
 			nvc0_fifo_create(dev);
-			break;
-		case NV_E0:
-			nve0_fifo_create(dev);
 			break;
 		default:
 			break;
 		}
 
 		switch (dev_priv->card_type) {
-		case NV_04:
-			nv04_fence_create(dev);
-			break;
-		case NV_10:
-		case NV_20:
-		case NV_30:
-		case NV_40:
-		case NV_50:
-			if (dev_priv->chipset < 0x84)
-				nv10_fence_create(dev);
-			else
-				nv84_fence_create(dev);
-			break;
 		case NV_C0:
 		case NV_D0:
 		case NV_E0:
@@ -340,16 +304,6 @@ nouveau_card_init(struct drm_device *dev)
 		}
 
 		switch (dev_priv->card_type) {
-		case NV_04:
-		case NV_10:
-		case NV_20:
-		case NV_30:
-		case NV_40:
-			nv04_software_create(dev);
-			break;
-		case NV_50:
-			nv50_software_create(dev);
-			break;
 		case NV_C0:
 		case NV_D0:
 		case NV_E0:
@@ -360,28 +314,9 @@ nouveau_card_init(struct drm_device *dev)
 		}
 
 		switch (dev_priv->card_type) {
-		case NV_04:
-			nv04_graph_create(dev);
-			break;
-		case NV_10:
-			nv10_graph_create(dev);
-			break;
-		case NV_20:
-		case NV_30:
-			nv20_graph_create(dev);
-			break;
-		case NV_40:
-			nv40_graph_create(dev);
-			break;
-		case NV_50:
-			nv50_graph_create(dev);
-			break;
 		case NV_C0:
 		case NV_D0:
 			nvc0_graph_create(dev);
-			break;
-		case NV_E0:
-			nve0_graph_create(dev);
 			break;
 		default:
 			break;
@@ -404,15 +339,6 @@ nouveau_card_init(struct drm_device *dev)
 		}
 
 		switch (dev_priv->card_type) {
-		case NV_50:
-			switch (dev_priv->chipset) {
-			case 0xa3:
-			case 0xa5:
-			case 0xa8:
-				nva3_copy_create(dev);
-				break;
-			}
-			break;
 		case NV_C0:
 			if (!(nv_rd32(dev, 0x022500) & 0x00000200))
 				nvc0_copy_create(dev, 1);

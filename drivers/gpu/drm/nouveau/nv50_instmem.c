@@ -43,95 +43,6 @@ struct nv50_instmem_priv {
 	struct nouveau_gpuobj *bar3_dmaobj;
 };
 
-static void
-nv50_channel_del(struct nouveau_channel **pchan)
-{
-	struct nouveau_channel *chan;
-
-	chan = *pchan;
-	*pchan = NULL;
-	if (!chan)
-		return;
-
-	nouveau_gpuobj_ref(NULL, &chan->ramfc);
-	nouveau_vm_ref(NULL, &chan->vm, chan->vm_pd);
-	nouveau_para_virt_mem_ref(NULL, &chan->vm_pd);
-	if (drm_mm_initialized(&chan->ramin_heap))
-		drm_mm_takedown(&chan->ramin_heap);
-	nouveau_gpuobj_ref(NULL, &chan->ramin);
-	kfree(chan);
-}
-
-void
-nv50_instmem_takedown(struct drm_device *dev)
-{
-	struct drm_nouveau_private *dev_priv = dev->dev_private;
-	struct nv50_instmem_priv *priv = dev_priv->engine.instmem.priv;
-	struct nouveau_channel *chan = dev_priv->channels.ptr[0];
-	int i;
-
-	NV_DEBUG(dev, "\n");
-
-	if (!priv)
-		return;
-
-	dev_priv->ramin_available = false;
-
-	nouveau_vm_ref(NULL, &dev_priv->chan_vm, NULL);
-
-	for (i = 0x1700; i <= 0x1710; i += 4)
-		nv_wr32(dev, i, priv->save1700[(i - 0x1700) / 4]);
-
-	nouveau_gpuobj_ref(NULL, &priv->bar3_dmaobj);
-	nouveau_gpuobj_ref(NULL, &priv->bar1_dmaobj);
-
-	nouveau_vm_ref(NULL, &dev_priv->bar1_vm, chan->vm_pd);
-	dev_priv->channels.ptr[127] = 0;
-	nv50_channel_del(&dev_priv->channels.ptr[0]);
-
-	nouveau_para_virt_mem_ref(NULL, &dev_priv->bar3_vm->pgt[0].obj[0]);
-	nouveau_vm_ref(NULL, &dev_priv->bar3_vm, NULL);
-
-	if (drm_mm_initialized(&dev_priv->ramin_heap))
-		drm_mm_takedown(&dev_priv->ramin_heap);
-
-	dev_priv->engine.instmem.priv = NULL;
-	kfree(priv);
-}
-
-int
-nv50_instmem_suspend(struct drm_device *dev)
-{
-	struct drm_nouveau_private *dev_priv = dev->dev_private;
-
-	dev_priv->ramin_available = false;
-	return 0;
-}
-
-void
-nv50_instmem_resume(struct drm_device *dev)
-{
-	struct drm_nouveau_private *dev_priv = dev->dev_private;
-	struct nv50_instmem_priv *priv = dev_priv->engine.instmem.priv;
-	struct nouveau_channel *chan = dev_priv->channels.ptr[0];
-	int i;
-
-	/* Poke the relevant regs, and pray it works :) */
-	nv_wr32(dev, NV50_PUNK_BAR_CFG_BASE, (chan->ramin->vinst >> 12));
-	nv_wr32(dev, NV50_PUNK_UNK1710, 0);
-	nv_wr32(dev, NV50_PUNK_BAR_CFG_BASE, (chan->ramin->vinst >> 12) |
-					 NV50_PUNK_BAR_CFG_BASE_VALID);
-	nv_wr32(dev, NV50_PUNK_BAR1_CTXDMA, (priv->bar1_dmaobj->cinst >> 4) |
-					NV50_PUNK_BAR1_CTXDMA_VALID);
-	nv_wr32(dev, NV50_PUNK_BAR3_CTXDMA, (priv->bar3_dmaobj->cinst >> 4) |
-					NV50_PUNK_BAR3_CTXDMA_VALID);
-
-	for (i = 0; i < 8; i++)
-		nv_wr32(dev, 0x1900 + (i*4), 0);
-
-	dev_priv->ramin_available = true;
-}
-
 struct nv50_gpuobj_node {
 	struct nouveau_mem *vram;
 	struct nouveau_vma chan_vma;
@@ -231,19 +142,6 @@ nv50_instmem_unmap(struct nouveau_gpuobj *gpuobj)
 		nouveau_vm_unmap(&node->vram->bar_vma);
 		nouveau_vm_put(&node->vram->bar_vma);
 	}
-}
-
-void
-nv50_instmem_flush(struct drm_device *dev)
-{
-	struct drm_nouveau_private *dev_priv = dev->dev_private;
-	unsigned long flags;
-
-	spin_lock_irqsave(&dev_priv->vm_lock, flags);
-	nv_wr32(dev, 0x00330c, 0x00000001);
-	if (!nv_wait(dev, 0x00330c, 0x00000002, 0x00000000))
-		NV_ERROR(dev, "PRAMIN flush timeout\n");
-	spin_unlock_irqrestore(&dev_priv->vm_lock, flags);
 }
 
 void
