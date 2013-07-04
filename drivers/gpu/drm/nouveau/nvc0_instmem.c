@@ -137,6 +137,7 @@ nvc0_instmem_init(struct drm_device *dev)
 	if (ret)
 		goto error;
 	dev_priv->bar3_vm->pgt[0].refcount[0] = 1;
+	nouveau_para_virt_bar3_pgt(dev_priv->bar3_vm->pgt[0].obj[0]);
 
 	// nv50_instmem_map(dev_priv->bar3_vm->pgt[0].obj[0]);
 

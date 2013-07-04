@@ -14,6 +14,7 @@ enum {
 	NOUVEAU_PV_OP_VM_FLUSH,
 	NOUVEAU_PV_OP_MEM_ALLOC,
 	NOUVEAU_PV_OP_MEM_FREE,
+	NOUVEAU_PV_OP_BAR3_PGT,
 };
 
 struct nouveau_para_virt_slot {
@@ -47,5 +48,6 @@ int nouveau_para_virt_set_pgd(struct nouveau_channel*, struct nouveau_para_virt_
 int nouvaeu_para_virt_map_pgt(struct nouveau_para_virt_mem *pgd, u32 index, struct nouveau_para_virt_mem *pgt[2]);
 int nouveau_para_virt_map(struct nouveau_para_virt_mem *pgt, u32 index, u64 phys);
 int nouveau_para_virt_vm_flush(struct nouveau_para_virt_mem* pgd, u32 engine);
+int nouveau_para_virt_bar3_pgt(struct nouveau_para_virt_mem *pgt);
 
 #endif
