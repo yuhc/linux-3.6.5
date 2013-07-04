@@ -204,8 +204,8 @@ int nouveau_para_virt_mem_new(struct drm_device *dev, u32 size, struct nouveau_p
 
 static void nouveau_para_virt_mem_del(struct kref *ref) {
 	struct nouveau_para_virt_mem *obj = container_of(ref, struct nouveau_para_virt_mem, refcount);
+	struct drm_device* dev = obj->dev;
 	{
-		int ret;
 		struct nouveau_para_virt_slot* slot = nouveau_para_virt_alloc_slot(dev);
 		slot->u8[0] = NOUVEAU_PV_OP_MEM_FREE;
 		slot->u32[1] = obj->id;
