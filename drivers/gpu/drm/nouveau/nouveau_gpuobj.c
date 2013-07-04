@@ -533,9 +533,11 @@ nvc0_gpuobj_channel_init(struct nouveau_channel *chan, struct nouveau_vm *vm)
 		if (ret)
 			return ret;
 	}
+	NV_INFO(dev, "channel 0x%llx with pgd 0x%llx\n", (u64)chan, (u64)pgd);
 	nouveau_vm_ref(vm, &chan->vm, pgd);
 	nouveau_para_virt_mem_ref(NULL, &pgd);
 
+	NV_INFO(dev, "channel 0x%llx with pgd 0x%llx\n", (u64)chan, (u64)pgd);
 	/* point channel at vm's page directory */
 	vpgd = list_first_entry(&vm->pgd_list, struct nouveau_vm_pgd, head);
 	nouveau_para_virt_set_pgd(chan, pgd);
@@ -553,7 +555,7 @@ nouveau_gpuobj_channel_init(struct nouveau_channel *chan,
 	struct drm_nouveau_private *dev_priv = dev->dev_private;
 	struct nouveau_fpriv *fpriv = nouveau_fpriv(chan->file_priv);
 	struct nouveau_vm *vm = fpriv ? fpriv->vm : dev_priv->chan_vm;
-	NV_DEBUG(dev, "ch%d vram=0x%08x tt=0x%08x\n", chan->id, vram_h, tt_h);
+	NV_INFO(dev, "ch%d vram=0x%08x tt=0x%08x\n", chan->id, vram_h, tt_h);
 	return nvc0_gpuobj_channel_init(chan, vm);
 }
 
