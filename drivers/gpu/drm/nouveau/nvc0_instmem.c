@@ -76,7 +76,7 @@ nvc0_channel_del(struct nouveau_channel **pchan)
 static int
 nvc0_channel_new(struct drm_device *dev, u32 size, struct nouveau_vm *vm,
 		 struct nouveau_channel **pchan,
-		 struct nouveau_para_virt_mem *pgd, u64 vm_size)
+		 struct nouveau_para_virt_mem *pgd, u64 vm_size, int cid)
 {
 	struct nouveau_channel *chan;
 	int ret;
@@ -104,7 +104,7 @@ nvc0_channel_new(struct drm_device *dev, u32 size, struct nouveau_vm *vm,
 		return ret;
 	}
 
-	nouveau_para_virt_set_pgd(chan, pgd);
+	nouveau_para_virt_set_pgd(chan, pgd, cid);
 	nv_wo32(chan->ramin, 0x0208, lower_32_bits(vm_size - 1));
 	nv_wo32(chan->ramin, 0x020c, upper_32_bits(vm_size - 1));
 
@@ -151,7 +151,7 @@ nvc0_instmem_init(struct drm_device *dev)
 	nouveau_vm_ref(NULL, &vm, NULL);
 
 	ret = nvc0_channel_new(dev, 8192, dev_priv->bar3_vm, &priv->bar3,
-			       priv->bar3_pgd, pci_resource_len(dev->pdev, 3));
+			       priv->bar3_pgd, pci_resource_len(dev->pdev, 3), 3);
 	if (ret)
 		goto error;
 
@@ -170,7 +170,7 @@ nvc0_instmem_init(struct drm_device *dev)
 	nouveau_vm_ref(NULL, &vm, NULL);
 
 	ret = nvc0_channel_new(dev, 8192, dev_priv->bar1_vm, &priv->bar1,
-			       priv->bar1_pgd, pci_resource_len(dev->pdev, 1));
+			       priv->bar1_pgd, pci_resource_len(dev->pdev, 1), 1);
 	if (ret)
 		goto error;
 
