@@ -226,11 +226,13 @@ nouveau_card_init(struct drm_device *dev)
 		goto out;
 
 	/* Make the CRTCs and I2C buses accessible */
+	NV_INFO("Init CRTCs\n");
 	ret = engine->display.early_init(dev);
 	if (ret)
 		goto out_para_virt;
 
 	/* Parse BIOS tables / Run init tables if card not POSTed */
+	NV_INFO("Init BIOS\n");
 	ret = nouveau_bios_init(dev);
 	if (ret)
 		goto out_display_early;
@@ -244,29 +246,35 @@ nouveau_card_init(struct drm_device *dev)
 	}
 
 	/* PMC */
+	NV_INFO("Init PMC\n");
 	ret = engine->mc.init(dev);
 	if (ret)
 		goto out_bios;
 
 	/* PTIMER */
+	NV_INFO("Init PTIMER\n");
 	ret = engine->timer.init(dev);
 	if (ret)
 		goto out_mc;
 
 	/* PFB */
+	NV_INFO("Init PFB\n");
 	ret = engine->fb.init(dev);
 	if (ret)
 		goto out_timer;
 
+	NV_INFO("Init VRAM\n");
 	ret = engine->vram.init(dev);
 	if (ret)
 		goto out_fb;
 
 	/* PGPIO */
+	NV_INFO("Init PGIO\n");
 	ret = nouveau_gpio_create(dev);
 	if (ret)
 		goto out_vram;
 
+	NV_INFO("Init GPUOBJ\n");
 	ret = nouveau_gpuobj_init(dev);
 	if (ret)
 		goto out_gpio;
@@ -275,15 +283,18 @@ nouveau_card_init(struct drm_device *dev)
 	if (ret)
 		goto out_gpuobj;
 
+	NV_INFO("Init MEM VRAM\n");
 	ret = nouveau_mem_vram_init(dev);
 	if (ret)
 		goto out_instmem;
 
+	NV_INFO("Init MEM GART\n");
 	ret = nouveau_mem_gart_init(dev);
 	if (ret)
 		goto out_ttmvram;
 
 	if (!dev_priv->noaccel) {
+		NV_INFO("Init FIFO\n");
 		switch (dev_priv->card_type) {
 		case NV_C0:
 		case NV_D0:
@@ -293,6 +304,7 @@ nouveau_card_init(struct drm_device *dev)
 			break;
 		}
 
+		NV_INFO("Init FENCE\n");
 		switch (dev_priv->card_type) {
 		case NV_C0:
 		case NV_D0:
@@ -303,6 +315,7 @@ nouveau_card_init(struct drm_device *dev)
 			break;
 		}
 
+		NV_INFO("Init SOFTWARE\n");
 		switch (dev_priv->card_type) {
 		case NV_C0:
 		case NV_D0:
@@ -313,6 +326,7 @@ nouveau_card_init(struct drm_device *dev)
 			break;
 		}
 
+		NV_INFO("Init GRAPH\n");
 		switch (dev_priv->card_type) {
 		case NV_C0:
 		case NV_D0:
@@ -322,6 +336,7 @@ nouveau_card_init(struct drm_device *dev)
 			break;
 		}
 
+		NV_INFO("Init CRYPT\n");
 		switch (dev_priv->chipset) {
 		case 0x84:
 		case 0x86:
@@ -338,6 +353,7 @@ nouveau_card_init(struct drm_device *dev)
 			break;
 		}
 
+		NV_INFO("Init COPY\n");
 		switch (dev_priv->card_type) {
 		case NV_C0:
 			if (!(nv_rd32(dev, 0x022500) & 0x00000200))
@@ -350,6 +366,7 @@ nouveau_card_init(struct drm_device *dev)
 			break;
 		}
 
+		NV_INFO("Init OTHERS\n");
 		if (dev_priv->chipset >= 0xa3 || dev_priv->chipset == 0x98) {
 			nv84_bsp_create(dev);
 			nv84_vp_create(dev);
@@ -370,8 +387,10 @@ nouveau_card_init(struct drm_device *dev)
 			nv31_mpeg_create(dev);
 		}
 
+		NV_INFO("Init ENGINES\n");
 		for (e = 0; e < NVOBJ_ENGINE_NR; e++) {
 			if (dev_priv->eng[e]) {
+				NV_INFO("Init ENGINES[%d]\n", e);
 				ret = dev_priv->eng[e]->init(dev, e);
 				if (ret)
 					goto out_engine;
@@ -379,31 +398,39 @@ nouveau_card_init(struct drm_device *dev)
 		}
 	}
 
+	NV_INFO("Init IRQ\n", e);
 	ret = nouveau_irq_init(dev);
 	if (ret)
 		goto out_engine;
 
+	NV_INFO("Init DISPLAY CREATE\n", e);
 	ret = nouveau_display_create(dev);
 	if (ret)
 		goto out_irq;
 
+	NV_INFO("Init BACKLIGHT\n", e);
 	nouveau_backlight_init(dev);
+	NV_INFO("Init PM\n", e);
 	nouveau_pm_init(dev);
 
 	if (dev_priv->eng[NVOBJ_ENGINE_GR]) {
+		NV_INFO("Init CARD CHANNEL\n", e);
 		ret = nouveau_card_channel_init(dev);
 		if (ret)
 			goto out_pm;
 	}
 
 	if (dev->mode_config.num_crtc) {
+		NV_INFO("Init DISPLAY\n", e);
 		ret = nouveau_display_init(dev);
 		if (ret)
 			goto out_chan;
 
+		NV_INFO("Init FBCON\n", e);
 		nouveau_fbcon_init(dev);
 	}
 
+	NV_INFO("DONE\n", e);
 	return 0;
 
 out_chan:
