@@ -38,6 +38,8 @@ struct nouveau_para_virt_mem {
 };
 
 struct nouveau_channel;
+struct nouveau_vma;
+struct nouveau_mem;
 
 int  nouveau_para_virt_init(struct drm_device *);
 void nouveau_para_virt_takedown(struct drm_device *);

@@ -44,6 +44,21 @@ struct nouveau_para_virt_priv {
 	struct semaphore sema;
 };
 
+static inline u64
+nvc0_vm_addr(struct nouveau_vma *vma, u64 phys, u32 memtype, u32 target)
+{
+	phys >>= 8;
+
+	phys |= 0x00000001; /* present */
+	if (vma->access & NV_MEM_ACCESS_SYS)
+		phys |= 0x00000002;
+
+	phys |= ((u64)target  << 32);
+	phys |= ((u64)memtype << 36);
+
+	return phys;
+}
+
 static inline u32 nvpv_rd32(struct nouveau_para_virt_priv *priv, unsigned reg) {
 	return ioread32_native(priv->mmio + reg);
 }
@@ -294,19 +309,19 @@ int nouveau_para_virt_map_batch(struct nouveau_para_virt_mem *pgt, u32 index, u6
 
 	ret = slot->u32[0];
 
-	nouveau_para_virt_free_slot(dev, slot);}
+	nouveau_para_virt_free_slot(dev, slot);
 	return ret;
 }
 
 int nouveau_para_virt_map_sg_batch(struct nouveau_para_virt_mem *pgt, u32 index, struct nouveau_vma *vma, struct nouveau_mem *mem, dma_addr_t *list, u32 count) {
 	struct drm_device* dev = pgt->dev;
-	int ret;
 	struct nouveau_para_virt_slot* slot = nouveau_para_virt_alloc_slot(dev);
 	const u32 filled = count / NOUVEAU_PV_BATCH_SIZE;
 	const u32 rest = count % NOUVEAU_PV_BATCH_SIZE;
 	const u32 target = (vma->access & NV_MEM_ACCESS_NOSNOOP) ? 7 : 5;
 
 	if (filled) {
+		int ret;
 		u32 i, j;
 		for (i = 0; i < filled; ++i) {
 			slot->u8[0] = NOUVEAU_PV_OP_MAP_SG_BATCH;
@@ -326,12 +341,14 @@ int nouveau_para_virt_map_sg_batch(struct nouveau_para_virt_mem *pgt, u32 index,
 	}
 
 	if (rest) {
+		int ret;
+		u32 i;
 		slot->u8[0] = NOUVEAU_PV_OP_MAP_SG_BATCH;
 		slot->u32[1] = pgt->id;
 		slot->u32[2] = index + NOUVEAU_PV_BATCH_SIZE * filled;
 		slot->u32[3] = rest;
-		for (j = 0; j < rest; ++j) {
-			slot->u64[2 + j] = nvc0_vm_addr(vma, *list++, mem->memtype, target);
+		for (i = 0; i < rest; ++i) {
+			slot->u64[2 + i] = nvc0_vm_addr(vma, *list++, mem->memtype, target);
 		}
 		nouveau_para_virt_call(dev, slot);
 		ret = slot->u32[0];
@@ -345,7 +362,7 @@ int nouveau_para_virt_map_sg_batch(struct nouveau_para_virt_mem *pgt, u32 index,
 	return 0;
 }
 
-int nouveau_para_virt_unmap_batch(struct nouveau_para_virt_mem *pgt, u32 index, u32 count);
+int nouveau_para_virt_unmap_batch(struct nouveau_para_virt_mem *pgt, u32 index, u32 count) {
 	struct drm_device* dev = pgt->dev;
 	int ret;
 	struct nouveau_para_virt_slot* slot = nouveau_para_virt_alloc_slot(dev);
@@ -357,7 +374,7 @@ int nouveau_para_virt_unmap_batch(struct nouveau_para_virt_mem *pgt, u32 index, 
 
 	ret = slot->u32[0];
 
-	nouveau_para_virt_free_slot(dev, slot);}
+	nouveau_para_virt_free_slot(dev, slot);
 	return ret;
 }
 
