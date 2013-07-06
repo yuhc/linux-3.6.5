@@ -248,6 +248,7 @@ static void
 nouveau_perf_voltage(struct drm_device *dev, struct nouveau_pm_level *perflvl)
 {
 	struct drm_nouveau_private *dev_priv = dev->dev_private;
+	struct nouveau_pm_voltage *volt = &dev_priv->engine.pm.voltage;
 	struct bit_entry P;
 	u8 *vmap;
 	int id;
@@ -283,6 +284,20 @@ nouveau_perf_voltage(struct drm_device *dev, struct nouveau_pm_level *perflvl)
 		vmap += vmap[1] + (vmap[2] * id);
 		perflvl->volt_min = ROM32(vmap[0]);
 		perflvl->volt_max = ROM32(vmap[4]);
+	}
+
+	/* Adjust for buggy bioses */
+	if (!volt->step_uv || !volt->step_ofs)
+		return;
+
+	if (perflvl->volt_min % volt->step_uv != volt->step_ofs) {
+		perflvl->volt_min -= perflvl->volt_min % volt->step_uv;
+		perflvl->volt_min += volt->step_ofs;
+	}
+
+	if (perflvl->volt_max % volt->step_uv != volt->step_ofs) {
+		perflvl->volt_max -= perflvl->volt_max % volt->step_uv;
+		perflvl->volt_max += volt->step_ofs;
 	}
 }
 

@@ -232,6 +232,10 @@ nouveau_volt_init(struct drm_device *dev)
 			voltage->level[vid].vid = vid;
 			volt_uv += step_uv;
 		}
+
+		voltage->setp_uv = step_uv >= 0 ? step_uv : -step_uv;
+		if (step_uv)
+			voltage->step_ofs = volt_uv % voltage->step_uv;
 	}
 
 	voltage->supported = true;
