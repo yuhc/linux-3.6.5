@@ -333,7 +333,7 @@ int nouveau_para_virt_map_sg_batch(struct nouveau_para_virt_mem *pgt, u32 index,
 			}
 			nouveau_para_virt_call(dev, slot);
 			ret = slot->u32[0];
-			if (!ret) {
+			if (ret) {
 				nouveau_para_virt_free_slot(dev, slot);
 				return ret;
 			}
@@ -352,7 +352,7 @@ int nouveau_para_virt_map_sg_batch(struct nouveau_para_virt_mem *pgt, u32 index,
 		}
 		nouveau_para_virt_call(dev, slot);
 		ret = slot->u32[0];
-		if (!ret) {
+		if (ret) {
 			nouveau_para_virt_free_slot(dev, slot);
 			return ret;
 		}
