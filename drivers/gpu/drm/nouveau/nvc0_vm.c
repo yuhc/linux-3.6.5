@@ -55,40 +55,21 @@ nvc0_vm_map(struct nouveau_vma *vma, struct nouveau_para_virt_mem *pgt,
 	    struct nouveau_mem *mem, u32 pte, u32 cnt, u64 phys, u64 delta)
 {
 	u32 next = 1 << (vma->node->type - 8);
-
 	phys  = nvc0_vm_addr(vma, phys, mem->memtype, 0);
-	// TODO(Yusuke Suzuki):
-	// optimize it
-	while (cnt--) {
-		nouveau_para_virt_map(pgt, pte, phys);
-		phys += next;
-		pte += 1;
-	}
+	nouveau_para_virt_map_batch(pgt, pte, phys, next, cnt);
 }
 
 void
 nvc0_vm_map_sg(struct nouveau_vma *vma, struct nouveau_para_virt_mem *pgt,
 	       struct nouveau_mem *mem, u32 pte, u32 cnt, dma_addr_t *list)
 {
-	u32 target = (vma->access & NV_MEM_ACCESS_NOSNOOP) ? 7 : 5;
-	// TODO(Yusuke Suzuki):
-	// optimize it
-	while (cnt--) {
-		u64 phys = nvc0_vm_addr(vma, *list++, mem->memtype, target);
-		nouveau_para_virt_map(pgt, pte, phys);
-		pte += 1;
-	}
+	nouveau_para_virt_map_sg_batch(pgt, pte, vma, mem, list, cnt);
 }
 
 void
 nvc0_vm_unmap(struct nouveau_para_virt_mem *pgt, u32 pte, u32 cnt)
 {
-	// TODO(Yusuke Suzuki):
-	// optimize it
-	while (cnt--) {
-		nouveau_para_virt_map(pgt, pte, 0x00000000);
-		pte += 1;
-	}
+	nouveau_para_virt_unmap_batch(pgt, pte, cnt);
 }
 
 void

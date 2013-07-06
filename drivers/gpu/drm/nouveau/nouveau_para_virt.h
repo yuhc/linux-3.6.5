@@ -5,12 +5,16 @@
 #define NOUVEAU_PV_SLOT_SIZE 0x1000ULL
 #define NOUVEAU_PV_SLOT_NUM 64ULL
 #define NOUVEAU_PV_SLOT_TOTAL (NOUVEAU_PV_SLOT_SIZE * NOUVEAU_PV_SLOT_NUM)
+#define NOUVEAU_PV_BATCH_SIZE 128ULL
 
 /* PV OPS */
 enum {
 	NOUVEAU_PV_OP_SET_PGD,
 	NOUVEAU_PV_OP_MAP_PGT,
 	NOUVEAU_PV_OP_MAP,
+	NOUVEAU_PV_OP_MAP_BATCH,
+	NOUVEAU_PV_OP_MAP_SG_BATCH,
+	NOUVEAU_PV_OP_UNMAP_BATCH,
 	NOUVEAU_PV_OP_VM_FLUSH,
 	NOUVEAU_PV_OP_MEM_ALLOC,
 	NOUVEAU_PV_OP_MEM_FREE,
@@ -47,6 +51,9 @@ void nouveau_para_virt_mem_ref(struct nouveau_para_virt_mem *, struct nouveau_pa
 int nouveau_para_virt_set_pgd(struct nouveau_channel*, struct nouveau_para_virt_mem*, int id);
 int nouvaeu_para_virt_map_pgt(struct nouveau_para_virt_mem *pgd, u32 index, struct nouveau_para_virt_mem *pgt[2]);
 int nouveau_para_virt_map(struct nouveau_para_virt_mem *pgt, u32 index, u64 phys);
+int nouveau_para_virt_map_batch(struct nouveau_para_virt_mem *pgt, u32 index, u64 phys, u32 next, u32 count);
+int nouveau_para_virt_unmap_batch(struct nouveau_para_virt_mem *pgt, u32 index, u32 count);
+int nouveau_para_virt_map_sg_batch(struct nouveau_para_virt_mem *pgt, u32 index, struct nouveau_vma *vma, struct nouveau_mem *mem, dma_addr_t *list, u32 count);
 int nouveau_para_virt_vm_flush(struct nouveau_para_virt_mem* pgd, u32 engine);
 int nouveau_para_virt_bar3_pgt(struct nouveau_para_virt_mem *pgt);
 
