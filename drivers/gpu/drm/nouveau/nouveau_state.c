@@ -398,39 +398,39 @@ nouveau_card_init(struct drm_device *dev)
 		}
 	}
 
-	NV_INFO(dev, "Init IRQ\n", e);
+	NV_INFO(dev, "Init IRQ\n");
 	ret = nouveau_irq_init(dev);
 	if (ret)
 		goto out_engine;
 
-	NV_INFO(dev, "Init DISPLAY CREATE\n", e);
+	NV_INFO(dev, "Init DISPLAY CREATE\n");
 	ret = nouveau_display_create(dev);
 	if (ret)
 		goto out_irq;
 
-	NV_INFO(dev, "Init BACKLIGHT\n", e);
+	NV_INFO(dev, "Init BACKLIGHT\n");
 	nouveau_backlight_init(dev);
-	NV_INFO(dev, "Init PM\n", e);
+	NV_INFO(dev, "Init PM\n");
 	nouveau_pm_init(dev);
 
 	if (dev_priv->eng[NVOBJ_ENGINE_GR]) {
-		NV_INFO(dev, "Init CARD CHANNEL\n", e);
+		NV_INFO(dev, "Init CARD CHANNEL\n");
 		ret = nouveau_card_channel_init(dev);
 		if (ret)
 			goto out_pm;
 	}
 
 	if (dev->mode_config.num_crtc) {
-		NV_INFO(dev, "Init DISPLAY\n", e);
+		NV_INFO(dev, "Init DISPLAY\n");
 		ret = nouveau_display_init(dev);
 		if (ret)
 			goto out_chan;
 
-		NV_INFO(dev, "Init FBCON\n", e);
+		NV_INFO(dev, "Init FBCON\n");
 		nouveau_fbcon_init(dev);
 	}
 
-	NV_INFO(dev, "DONE\n", e);
+	NV_INFO(dev, "DONE\n");
 	return 0;
 
 out_chan:
