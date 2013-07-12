@@ -39,7 +39,8 @@
 #define NOUVEAU_FAMILY   0x0000FFFF
 #define NOUVEAU_FLAGS    0xFFFF0000
 
-#define NOUVEAU_2G 0x80000000ULL
+#define NOUVEAU_512M 0x20000000ULL
+#define NOUVEAU_2G   0x80000000ULL
 
 #include "ttm/ttm_bo_api.h"
 #include "ttm/ttm_bo_driver.h"
