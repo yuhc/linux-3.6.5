@@ -405,8 +405,11 @@ nouveau_vm_link(struct nouveau_vm *vm, struct nouveau_para_virt_mem *pgd)
 	mutex_lock(&vm->mm.mutex);
 	// TODO(Yusuke Suzuki):
 	// Optimize it
-	for (i = vm->fpde; i <= vm->lpde; i++)
-		vm->map_pgt(pgd, i, vm->pgt[i - vm->fpde].obj);
+	NV_INFO(vm->dev, "MAP_PGT calls with%u\n", vm->lpde - vm->fpde + 1);
+	nouvaeu_para_virt_map_pgt_batch(pgd, vm);
+	// for (i = vm->fpde; i <= vm->lpde; i++) {
+	// 	vm->map_pgt(pgd, i, vm->pgt[i - vm->fpde].obj);
+	// }
 	list_add(&vpgd->head, &vm->pgd_list);
 	mutex_unlock(&vm->mm.mutex);
 	return 0;

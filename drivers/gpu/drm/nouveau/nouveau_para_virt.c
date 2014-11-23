@@ -260,6 +260,61 @@ int nouveau_para_virt_set_pgd(struct nouveau_channel* chan, struct nouveau_para_
 	return ret;
 }
 
+int nouvaeu_para_virt_map_pgt_batch(struct nouveau_para_virt_mem *pgd, struct nouveau_vm *vm) {
+	struct drm_device* dev = pgd->dev;
+	int ret = 0;
+	struct nouveau_para_virt_slot* slot = nouveau_para_virt_alloc_slot(dev);
+	const u32 count = vm->lpde - vm->fpde + 1;
+	const u32 filled = count / NOUVEAU_PV_BATCH_SIZE;
+	const u32 rest = count % NOUVEAU_PV_BATCH_SIZE;
+	const u32 index = vm->fpde;
+
+	if (filled) {
+		int ret;
+		u32 i, j;
+		for (i = 0; i < filled; ++i) {
+			slot->u8[0] = NOUVEAU_PV_OP_MAP_PGT_BATCH;
+			slot->u32[1] = pgd->id;
+			slot->u32[2] = index + NOUVEAU_PV_BATCH_SIZE * i;
+			slot->u32[3] = NOUVEAU_PV_BATCH_SIZE;
+			for (j = 0; j < NOUVEAU_PV_BATCH_SIZE; ++j) {
+				struct nouveau_para_virt_mem **pgt = vm->pgt[NOUVEAU_PV_BATCH_SIZE * i + j].obj;
+				slot->u32[4 + j * 2] = (pgt[0]) ? pgt[0]->id : 0;
+				slot->u32[5 + j * 2] = (pgt[1]) ? pgt[1]->id : 0;
+			}
+			nouveau_para_virt_call(dev, slot);
+			ret = slot->u32[0];
+			if (ret) {
+				nouveau_para_virt_free_slot(dev, slot);
+				return ret;
+			}
+		}
+	}
+
+	if (rest) {
+		int ret;
+		u32 i;
+		slot->u8[0] = NOUVEAU_PV_OP_MAP_PGT_BATCH;
+		slot->u32[1] = pgd->id;
+		slot->u32[2] = index + NOUVEAU_PV_BATCH_SIZE * filled;
+		slot->u32[3] = rest;
+		for (i = 0; i < rest; ++i) {
+			struct nouveau_para_virt_mem **pgt = vm->pgt[NOUVEAU_PV_BATCH_SIZE * filled + i].obj;
+			slot->u32[4 + i * 2] = (pgt[0]) ? pgt[0]->id : 0;
+			slot->u32[5 + i * 2] = (pgt[1]) ? pgt[1]->id : 0;
+		}
+		nouveau_para_virt_call(dev, slot);
+		ret = slot->u32[0];
+		if (ret) {
+			nouveau_para_virt_free_slot(dev, slot);
+			return ret;
+		}
+	}
+
+	nouveau_para_virt_free_slot(dev, slot);
+	return ret;
+}
+
 int nouvaeu_para_virt_map_pgt(struct nouveau_para_virt_mem *pgd, u32 index, struct nouveau_para_virt_mem *pgt[2]) {
 	struct drm_device* dev = pgd->dev;
 	int ret;
