@@ -19,7 +19,6 @@ enum {
 	NOUVEAU_PV_OP_MEM_ALLOC,
 	NOUVEAU_PV_OP_MEM_FREE,
 	NOUVEAU_PV_OP_BAR3_PGT,
-	NOUVEAU_PV_OP_MAP_PGT_BATCH,
 };
 
 struct nouveau_para_virt_slot {
@@ -53,7 +52,6 @@ void nouveau_para_virt_mem_ref(struct nouveau_para_virt_mem *, struct nouveau_pa
 
 int nouveau_para_virt_set_pgd(struct nouveau_channel*, struct nouveau_para_virt_mem*, int id);
 int nouvaeu_para_virt_map_pgt(struct nouveau_para_virt_mem *pgd, u32 index, struct nouveau_para_virt_mem *pgt[2]);
-int nouvaeu_para_virt_map_pgt_batch(struct nouveau_para_virt_mem *pgd, struct nouveau_vm *vm);
 int nouveau_para_virt_map(struct nouveau_para_virt_mem *pgt, u32 index, u64 phys);
 int nouveau_para_virt_map_batch(struct nouveau_para_virt_mem *pgt, u32 index, u64 phys, u32 next, u32 count);
 int nouveau_para_virt_unmap_batch(struct nouveau_para_virt_mem *pgt, u32 index, u32 count);
