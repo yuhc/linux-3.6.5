@@ -142,7 +142,7 @@ int  nouveau_para_virt_init(struct drm_device *dev) {
 	spin_lock_init(&priv->lock);
 	sema_init(&priv->sema, NOUVEAU_PV_SLOT_NUM);
 
-	if (!(priv->slot = kzalloc(NOUVEAU_PV_SLOT_TOTAL, GFP_KERNEL))) {
+	if (!(priv->slot = __get_free_pages(GFP_KERNEL, get_order(NOUVEAU_PV_SLOT_TOTAL)))) {
 		return -ENOMEM;
 	}
 	((u32*)priv->slot)[0] = 0xdeadbeefUL;
@@ -154,7 +154,7 @@ int  nouveau_para_virt_init(struct drm_device *dev) {
 	}
 
 	// notify this physical address to A3
-	address = __pa(priv->slot);  // convert kmalloc-ed virt to phys
+	address = virt_to_phys(priv->slot);  // convert kmalloc-ed virt to phys
 	nvpv_wr32(priv, 0x4, lower_32_bits(address));
 	nvpv_wr32(priv, 0x8, upper_32_bits(address));
 	if (nvpv_rd32(priv, 0x0) != 0x0) {
@@ -176,7 +176,7 @@ void nouveau_para_virt_takedown(struct drm_device *dev) {
 	}
 
 	if (priv->slot) {
-		kfree(priv->slot);
+		free_pages(priv->slot, get_order(NOUVEAU_PV_SLOT_TOTAL));
 	}
 
 	if (priv->mmio) {
