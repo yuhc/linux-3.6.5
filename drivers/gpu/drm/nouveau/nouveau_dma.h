@@ -54,7 +54,6 @@ enum {
 	NvSub2D		= 3,
 	NvSubGdiRect    = 3,
 	NvSubCopy	= 4,
-	NvSubM2MF	= 5,
 };
 
 /* Object handles. */
