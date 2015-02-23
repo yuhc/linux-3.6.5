@@ -36,7 +36,7 @@ nouveau_ramht_hash_handle(struct nouveau_channel *chan, u32 handle)
 	u32 hash = 0;
 	int i;
 
-	NV_INFO(dev, "ch%d handle=0x%08x\n", chan->id, handle);
+	NV_DEBUG(dev, "ch%d handle=0x%08x\n", chan->id, handle);
 
 	for (i = 32; i > 0; i -= ramht->bits) {
 		hash ^= (handle & ((1 << ramht->bits) - 1));
@@ -47,7 +47,7 @@ nouveau_ramht_hash_handle(struct nouveau_channel *chan, u32 handle)
 		hash ^= chan->id << (ramht->bits - 4);
 	hash <<= 3;
 
-	NV_INFO(dev, "hash=0x%08x\n", hash);
+	NV_DEBUG(dev, "hash=0x%08x\n", hash);
 	return hash;
 }
 
@@ -130,7 +130,7 @@ nouveau_ramht_insert(struct nouveau_channel *chan, u32 handle,
 	co = ho = nouveau_ramht_hash_handle(chan, handle);
 	do {
 		if (!nouveau_ramht_entry_valid(dev, ramht, co)) {
-			NV_INFO(dev,
+			NV_DEBUG(dev,
 				 "insert ch%d 0x%08x: h=0x%08x, c=0x%08x\n",
 				 chan->id, co, handle, ctx);
 			nv_wo32(ramht, co + 0, handle);
@@ -140,7 +140,7 @@ nouveau_ramht_insert(struct nouveau_channel *chan, u32 handle,
 			instmem->flush(dev);
 			return 0;
 		}
-		NV_INFO(dev, "collision ch%d 0x%08x: h=0x%08x\n",
+		NV_DEBUG(dev, "collision ch%d 0x%08x: h=0x%08x\n",
 			 chan->id, co, nv_ro32(ramht, co));
 
 		co += 8;
@@ -196,7 +196,7 @@ nouveau_ramht_remove_hash(struct nouveau_channel *chan, u32 handle)
 		if (nouveau_ramht_entry_valid(dev, ramht, co) &&
 		    nouveau_ramht_entry_same_channel(chan, ramht, co) &&
 		    (handle == nv_ro32(ramht, co))) {
-			NV_INFO(dev,
+			NV_DEBUG(dev,
 				 "remove ch%d 0x%08x: h=0x%08x, c=0x%08x\n",
 				 chan->id, co, handle, nv_ro32(ramht, co + 4));
 			nv_wo32(ramht, co + 0, 0x00000000);
