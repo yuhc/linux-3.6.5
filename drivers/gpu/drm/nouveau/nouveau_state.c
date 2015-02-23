@@ -53,6 +53,260 @@ static int nouveau_init_engine_ptrs(struct drm_device *dev)
 	struct nouveau_engine *engine = &dev_priv->engine;
 
 	switch (dev_priv->chipset & 0xf0) {
+	case 0x00:
+		engine->instmem.init		= nv04_instmem_init;
+		engine->instmem.takedown	= nv04_instmem_takedown;
+		engine->instmem.suspend		= nv04_instmem_suspend;
+		engine->instmem.resume		= nv04_instmem_resume;
+		engine->instmem.get		= nv04_instmem_get;
+		engine->instmem.put		= nv04_instmem_put;
+		engine->instmem.map		= nv04_instmem_map;
+		engine->instmem.unmap		= nv04_instmem_unmap;
+		engine->instmem.flush		= nv04_instmem_flush;
+		engine->mc.init			= nv04_mc_init;
+		engine->mc.takedown		= nv04_mc_takedown;
+		engine->timer.init		= nv04_timer_init;
+		engine->timer.read		= nv04_timer_read;
+		engine->timer.takedown		= nv04_timer_takedown;
+		engine->fb.init			= nv04_fb_init;
+		engine->fb.takedown		= nv04_fb_takedown;
+		engine->display.early_init	= nv04_display_early_init;
+		engine->display.late_takedown	= nv04_display_late_takedown;
+		engine->display.create		= nv04_display_create;
+		engine->display.destroy		= nv04_display_destroy;
+		engine->display.init		= nv04_display_init;
+		engine->display.fini		= nv04_display_fini;
+		engine->pm.clocks_get		= nv04_pm_clocks_get;
+		engine->pm.clocks_pre		= nv04_pm_clocks_pre;
+		engine->pm.clocks_set		= nv04_pm_clocks_set;
+		engine->vram.init		= nv04_fb_vram_init;
+		engine->vram.takedown		= nouveau_stub_takedown;
+		engine->vram.flags_valid	= nouveau_mem_flags_valid;
+		break;
+	case 0x10:
+		engine->instmem.init		= nv04_instmem_init;
+		engine->instmem.takedown	= nv04_instmem_takedown;
+		engine->instmem.suspend		= nv04_instmem_suspend;
+		engine->instmem.resume		= nv04_instmem_resume;
+		engine->instmem.get		= nv04_instmem_get;
+		engine->instmem.put		= nv04_instmem_put;
+		engine->instmem.map		= nv04_instmem_map;
+		engine->instmem.unmap		= nv04_instmem_unmap;
+		engine->instmem.flush		= nv04_instmem_flush;
+		engine->mc.init			= nv04_mc_init;
+		engine->mc.takedown		= nv04_mc_takedown;
+		engine->timer.init		= nv04_timer_init;
+		engine->timer.read		= nv04_timer_read;
+		engine->timer.takedown		= nv04_timer_takedown;
+		engine->fb.init			= nv10_fb_init;
+		engine->fb.takedown		= nv10_fb_takedown;
+		engine->fb.init_tile_region	= nv10_fb_init_tile_region;
+		engine->fb.set_tile_region	= nv10_fb_set_tile_region;
+		engine->fb.free_tile_region	= nv10_fb_free_tile_region;
+		engine->display.early_init	= nv04_display_early_init;
+		engine->display.late_takedown	= nv04_display_late_takedown;
+		engine->display.create		= nv04_display_create;
+		engine->display.destroy		= nv04_display_destroy;
+		engine->display.init		= nv04_display_init;
+		engine->display.fini		= nv04_display_fini;
+		engine->gpio.drive		= nv10_gpio_drive;
+		engine->gpio.sense		= nv10_gpio_sense;
+		engine->pm.clocks_get		= nv04_pm_clocks_get;
+		engine->pm.clocks_pre		= nv04_pm_clocks_pre;
+		engine->pm.clocks_set		= nv04_pm_clocks_set;
+		if (dev_priv->chipset == 0x1a ||
+		    dev_priv->chipset == 0x1f)
+			engine->vram.init	= nv1a_fb_vram_init;
+		else
+			engine->vram.init	= nv10_fb_vram_init;
+		engine->vram.takedown		= nouveau_stub_takedown;
+		engine->vram.flags_valid	= nouveau_mem_flags_valid;
+		break;
+	case 0x20:
+		engine->instmem.init		= nv04_instmem_init;
+		engine->instmem.takedown	= nv04_instmem_takedown;
+		engine->instmem.suspend		= nv04_instmem_suspend;
+		engine->instmem.resume		= nv04_instmem_resume;
+		engine->instmem.get		= nv04_instmem_get;
+		engine->instmem.put		= nv04_instmem_put;
+		engine->instmem.map		= nv04_instmem_map;
+		engine->instmem.unmap		= nv04_instmem_unmap;
+		engine->instmem.flush		= nv04_instmem_flush;
+		engine->mc.init			= nv04_mc_init;
+		engine->mc.takedown		= nv04_mc_takedown;
+		engine->timer.init		= nv04_timer_init;
+		engine->timer.read		= nv04_timer_read;
+		engine->timer.takedown		= nv04_timer_takedown;
+		engine->fb.init			= nv20_fb_init;
+		engine->fb.takedown		= nv20_fb_takedown;
+		engine->fb.init_tile_region	= nv20_fb_init_tile_region;
+		engine->fb.set_tile_region	= nv20_fb_set_tile_region;
+		engine->fb.free_tile_region	= nv20_fb_free_tile_region;
+		engine->display.early_init	= nv04_display_early_init;
+		engine->display.late_takedown	= nv04_display_late_takedown;
+		engine->display.create		= nv04_display_create;
+		engine->display.destroy		= nv04_display_destroy;
+		engine->display.init		= nv04_display_init;
+		engine->display.fini		= nv04_display_fini;
+		engine->gpio.drive		= nv10_gpio_drive;
+		engine->gpio.sense		= nv10_gpio_sense;
+		engine->pm.clocks_get		= nv04_pm_clocks_get;
+		engine->pm.clocks_pre		= nv04_pm_clocks_pre;
+		engine->pm.clocks_set		= nv04_pm_clocks_set;
+		engine->vram.init		= nv20_fb_vram_init;
+		engine->vram.takedown		= nouveau_stub_takedown;
+		engine->vram.flags_valid	= nouveau_mem_flags_valid;
+		break;
+	case 0x30:
+		engine->instmem.init		= nv04_instmem_init;
+		engine->instmem.takedown	= nv04_instmem_takedown;
+		engine->instmem.suspend		= nv04_instmem_suspend;
+		engine->instmem.resume		= nv04_instmem_resume;
+		engine->instmem.get		= nv04_instmem_get;
+		engine->instmem.put		= nv04_instmem_put;
+		engine->instmem.map		= nv04_instmem_map;
+		engine->instmem.unmap		= nv04_instmem_unmap;
+		engine->instmem.flush		= nv04_instmem_flush;
+		engine->mc.init			= nv04_mc_init;
+		engine->mc.takedown		= nv04_mc_takedown;
+		engine->timer.init		= nv04_timer_init;
+		engine->timer.read		= nv04_timer_read;
+		engine->timer.takedown		= nv04_timer_takedown;
+		engine->fb.init			= nv30_fb_init;
+		engine->fb.takedown		= nv30_fb_takedown;
+		engine->fb.init_tile_region	= nv30_fb_init_tile_region;
+		engine->fb.set_tile_region	= nv10_fb_set_tile_region;
+		engine->fb.free_tile_region	= nv30_fb_free_tile_region;
+		engine->display.early_init	= nv04_display_early_init;
+		engine->display.late_takedown	= nv04_display_late_takedown;
+		engine->display.create		= nv04_display_create;
+		engine->display.destroy		= nv04_display_destroy;
+		engine->display.init		= nv04_display_init;
+		engine->display.fini		= nv04_display_fini;
+		engine->gpio.drive		= nv10_gpio_drive;
+		engine->gpio.sense		= nv10_gpio_sense;
+		engine->pm.clocks_get		= nv04_pm_clocks_get;
+		engine->pm.clocks_pre		= nv04_pm_clocks_pre;
+		engine->pm.clocks_set		= nv04_pm_clocks_set;
+		engine->pm.voltage_get		= nouveau_voltage_gpio_get;
+		engine->pm.voltage_set		= nouveau_voltage_gpio_set;
+		engine->vram.init		= nv20_fb_vram_init;
+		engine->vram.takedown		= nouveau_stub_takedown;
+		engine->vram.flags_valid	= nouveau_mem_flags_valid;
+		break;
+	case 0x40:
+	case 0x60:
+		engine->instmem.init		= nv04_instmem_init;
+		engine->instmem.takedown	= nv04_instmem_takedown;
+		engine->instmem.suspend		= nv04_instmem_suspend;
+		engine->instmem.resume		= nv04_instmem_resume;
+		engine->instmem.get		= nv04_instmem_get;
+		engine->instmem.put		= nv04_instmem_put;
+		engine->instmem.map		= nv04_instmem_map;
+		engine->instmem.unmap		= nv04_instmem_unmap;
+		engine->instmem.flush		= nv04_instmem_flush;
+		engine->mc.init			= nv40_mc_init;
+		engine->mc.takedown		= nv40_mc_takedown;
+		engine->timer.init		= nv04_timer_init;
+		engine->timer.read		= nv04_timer_read;
+		engine->timer.takedown		= nv04_timer_takedown;
+		engine->fb.init			= nv40_fb_init;
+		engine->fb.takedown		= nv40_fb_takedown;
+		engine->fb.init_tile_region	= nv30_fb_init_tile_region;
+		engine->fb.set_tile_region	= nv40_fb_set_tile_region;
+		engine->fb.free_tile_region	= nv30_fb_free_tile_region;
+		engine->display.early_init	= nv04_display_early_init;
+		engine->display.late_takedown	= nv04_display_late_takedown;
+		engine->display.create		= nv04_display_create;
+		engine->display.destroy		= nv04_display_destroy;
+		engine->display.init		= nv04_display_init;
+		engine->display.fini		= nv04_display_fini;
+		engine->gpio.init		= nv10_gpio_init;
+		engine->gpio.fini		= nv10_gpio_fini;
+		engine->gpio.drive		= nv10_gpio_drive;
+		engine->gpio.sense		= nv10_gpio_sense;
+		engine->gpio.irq_enable		= nv10_gpio_irq_enable;
+		engine->pm.clocks_get		= nv40_pm_clocks_get;
+		engine->pm.clocks_pre		= nv40_pm_clocks_pre;
+		engine->pm.clocks_set		= nv40_pm_clocks_set;
+		engine->pm.voltage_get		= nouveau_voltage_gpio_get;
+		engine->pm.voltage_set		= nouveau_voltage_gpio_set;
+		engine->pm.temp_get		= nv40_temp_get;
+		engine->pm.pwm_get		= nv40_pm_pwm_get;
+		engine->pm.pwm_set		= nv40_pm_pwm_set;
+		engine->vram.init		= nv40_fb_vram_init;
+		engine->vram.takedown		= nouveau_stub_takedown;
+		engine->vram.flags_valid	= nouveau_mem_flags_valid;
+		break;
+	case 0x50:
+	case 0x80: /* gotta love NVIDIA's consistency.. */
+	case 0x90:
+	case 0xa0:
+		engine->instmem.init		= nv50_instmem_init;
+		engine->instmem.takedown	= nv50_instmem_takedown;
+		engine->instmem.suspend		= nv50_instmem_suspend;
+		engine->instmem.resume		= nv50_instmem_resume;
+		engine->instmem.get		= nv50_instmem_get;
+		engine->instmem.put		= nv50_instmem_put;
+		engine->instmem.map		= nv50_instmem_map;
+		engine->instmem.unmap		= nv50_instmem_unmap;
+		if (dev_priv->chipset == 0x50)
+			engine->instmem.flush	= nv50_instmem_flush;
+		else
+			engine->instmem.flush	= nv84_instmem_flush;
+		engine->mc.init			= nv50_mc_init;
+		engine->mc.takedown		= nv50_mc_takedown;
+		engine->timer.init		= nv04_timer_init;
+		engine->timer.read		= nv04_timer_read;
+		engine->timer.takedown		= nv04_timer_takedown;
+		engine->fb.init			= nv50_fb_init;
+		engine->fb.takedown		= nv50_fb_takedown;
+		engine->display.early_init	= nv50_display_early_init;
+		engine->display.late_takedown	= nv50_display_late_takedown;
+		engine->display.create		= nv50_display_create;
+		engine->display.destroy		= nv50_display_destroy;
+		engine->display.init		= nv50_display_init;
+		engine->display.fini		= nv50_display_fini;
+		engine->gpio.init		= nv50_gpio_init;
+		engine->gpio.fini		= nv50_gpio_fini;
+		engine->gpio.drive		= nv50_gpio_drive;
+		engine->gpio.sense		= nv50_gpio_sense;
+		engine->gpio.irq_enable		= nv50_gpio_irq_enable;
+		switch (dev_priv->chipset) {
+		case 0x84:
+		case 0x86:
+		case 0x92:
+		case 0x94:
+		case 0x96:
+		case 0x98:
+		case 0xa0:
+		case 0xaa:
+		case 0xac:
+		case 0x50:
+			engine->pm.clocks_get	= nv50_pm_clocks_get;
+			engine->pm.clocks_pre	= nv50_pm_clocks_pre;
+			engine->pm.clocks_set	= nv50_pm_clocks_set;
+			break;
+		default:
+			engine->pm.clocks_get	= nva3_pm_clocks_get;
+			engine->pm.clocks_pre	= nva3_pm_clocks_pre;
+			engine->pm.clocks_set	= nva3_pm_clocks_set;
+			break;
+		}
+		engine->pm.voltage_get		= nouveau_voltage_gpio_get;
+		engine->pm.voltage_set		= nouveau_voltage_gpio_set;
+		if (dev_priv->chipset >= 0x84)
+			engine->pm.temp_get	= nv84_temp_get;
+		else
+			engine->pm.temp_get	= nv40_temp_get;
+		engine->pm.pwm_get		= nv50_pm_pwm_get;
+		engine->pm.pwm_set		= nv50_pm_pwm_set;
+		engine->vram.init		= nv50_vram_init;
+		engine->vram.takedown		= nv50_vram_fini;
+		engine->vram.get		= nv50_vram_new;
+		engine->vram.put		= nv50_vram_del;
+		engine->vram.flags_valid	= nv50_vram_flags_valid;
+		break;
 	case 0xc0:
 		engine->instmem.init		= nvc0_instmem_init;
 		engine->instmem.takedown	= nvc0_instmem_takedown;
@@ -94,6 +348,80 @@ static int nouveau_init_engine_ptrs(struct drm_device *dev)
 		engine->pm.voltage_set		= nouveau_voltage_gpio_set;
 		engine->pm.pwm_get		= nv50_pm_pwm_get;
 		engine->pm.pwm_set		= nv50_pm_pwm_set;
+		break;
+	case 0xd0:
+		engine->instmem.init		= nvc0_instmem_init;
+		engine->instmem.takedown	= nvc0_instmem_takedown;
+		engine->instmem.suspend		= nvc0_instmem_suspend;
+		engine->instmem.resume		= nvc0_instmem_resume;
+		engine->instmem.get		= nv50_instmem_get;
+		engine->instmem.put		= nv50_instmem_put;
+		engine->instmem.map		= nv50_instmem_map;
+		engine->instmem.unmap		= nv50_instmem_unmap;
+		engine->instmem.flush		= nv84_instmem_flush;
+		engine->mc.init			= nv50_mc_init;
+		engine->mc.takedown		= nv50_mc_takedown;
+		engine->timer.init		= nv04_timer_init;
+		engine->timer.read		= nv04_timer_read;
+		engine->timer.takedown		= nv04_timer_takedown;
+		engine->fb.init			= nvc0_fb_init;
+		engine->fb.takedown		= nvc0_fb_takedown;
+		engine->display.early_init	= nouveau_stub_init;
+		engine->display.late_takedown	= nouveau_stub_takedown;
+		engine->display.create		= nvd0_display_create;
+		engine->display.destroy		= nvd0_display_destroy;
+		engine->display.init		= nvd0_display_init;
+		engine->display.fini		= nvd0_display_fini;
+		engine->gpio.init		= nv50_gpio_init;
+		engine->gpio.fini		= nv50_gpio_fini;
+		engine->gpio.drive		= nvd0_gpio_drive;
+		engine->gpio.sense		= nvd0_gpio_sense;
+		engine->gpio.irq_enable		= nv50_gpio_irq_enable;
+		engine->vram.init		= nvc0_vram_init;
+		engine->vram.takedown		= nv50_vram_fini;
+		engine->vram.get		= nvc0_vram_new;
+		engine->vram.put		= nv50_vram_del;
+		engine->vram.flags_valid	= nvc0_vram_flags_valid;
+		engine->pm.temp_get		= nv84_temp_get;
+		engine->pm.clocks_get		= nvc0_pm_clocks_get;
+		engine->pm.clocks_pre		= nvc0_pm_clocks_pre;
+		engine->pm.clocks_set		= nvc0_pm_clocks_set;
+		engine->pm.voltage_get		= nouveau_voltage_gpio_get;
+		engine->pm.voltage_set		= nouveau_voltage_gpio_set;
+		break;
+	case 0xe0:
+		engine->instmem.init		= nvc0_instmem_init;
+		engine->instmem.takedown	= nvc0_instmem_takedown;
+		engine->instmem.suspend		= nvc0_instmem_suspend;
+		engine->instmem.resume		= nvc0_instmem_resume;
+		engine->instmem.get		= nv50_instmem_get;
+		engine->instmem.put		= nv50_instmem_put;
+		engine->instmem.map		= nv50_instmem_map;
+		engine->instmem.unmap		= nv50_instmem_unmap;
+		engine->instmem.flush		= nv84_instmem_flush;
+		engine->mc.init			= nv50_mc_init;
+		engine->mc.takedown		= nv50_mc_takedown;
+		engine->timer.init		= nv04_timer_init;
+		engine->timer.read		= nv04_timer_read;
+		engine->timer.takedown		= nv04_timer_takedown;
+		engine->fb.init			= nvc0_fb_init;
+		engine->fb.takedown		= nvc0_fb_takedown;
+		engine->display.early_init	= nouveau_stub_init;
+		engine->display.late_takedown	= nouveau_stub_takedown;
+		engine->display.create		= nvd0_display_create;
+		engine->display.destroy		= nvd0_display_destroy;
+		engine->display.init		= nvd0_display_init;
+		engine->display.fini		= nvd0_display_fini;
+		engine->gpio.init		= nv50_gpio_init;
+		engine->gpio.fini		= nv50_gpio_fini;
+		engine->gpio.drive		= nvd0_gpio_drive;
+		engine->gpio.sense		= nvd0_gpio_sense;
+		engine->gpio.irq_enable		= nv50_gpio_irq_enable;
+		engine->vram.init		= nvc0_vram_init;
+		engine->vram.takedown		= nv50_vram_fini;
+		engine->vram.get		= nvc0_vram_new;
+		engine->vram.put		= nv50_vram_del;
+		engine->vram.flags_valid	= nvc0_vram_flags_valid;
 		break;
 	default:
 		NV_ERROR(dev, "NV%02x unsupported\n", dev_priv->chipset);
@@ -226,13 +554,11 @@ nouveau_card_init(struct drm_device *dev)
 		goto out;
 
 	/* Make the CRTCs and I2C buses accessible */
-	NV_INFO(dev, "Init CRTCs\n");
 	ret = engine->display.early_init(dev);
 	if (ret)
 		goto out_para_virt;
 
 	/* Parse BIOS tables / Run init tables if card not POSTed */
-	NV_INFO(dev, "Init BIOS\n");
 	ret = nouveau_bios_init(dev);
 	if (ret)
 		goto out_display_early;
@@ -246,35 +572,29 @@ nouveau_card_init(struct drm_device *dev)
 	}
 
 	/* PMC */
-	NV_INFO(dev, "Init PMC\n");
 	ret = engine->mc.init(dev);
 	if (ret)
 		goto out_bios;
 
 	/* PTIMER */
-	NV_INFO(dev, "Init PTIMER\n");
 	ret = engine->timer.init(dev);
 	if (ret)
 		goto out_mc;
 
 	/* PFB */
-	NV_INFO(dev, "Init PFB\n");
 	ret = engine->fb.init(dev);
 	if (ret)
 		goto out_timer;
 
-	NV_INFO(dev, "Init VRAM\n");
 	ret = engine->vram.init(dev);
 	if (ret)
 		goto out_fb;
 
 	/* PGPIO */
-	NV_INFO(dev, "Init PGIO\n");
 	ret = nouveau_gpio_create(dev);
 	if (ret)
 		goto out_vram;
 
-	NV_INFO(dev, "Init GPUOBJ\n");
 	ret = nouveau_gpuobj_init(dev);
 	if (ret)
 		goto out_gpio;
@@ -283,29 +603,61 @@ nouveau_card_init(struct drm_device *dev)
 	if (ret)
 		goto out_gpuobj;
 
-	NV_INFO(dev, "Init MEM VRAM\n");
 	ret = nouveau_mem_vram_init(dev);
 	if (ret)
 		goto out_instmem;
 
-	NV_INFO(dev, "Init MEM GART\n");
 	ret = nouveau_mem_gart_init(dev);
 	if (ret)
 		goto out_ttmvram;
 
 	if (!dev_priv->noaccel) {
-		NV_INFO(dev, "Init FIFO\n");
 		switch (dev_priv->card_type) {
+		case NV_04:
+			nv04_fifo_create(dev);
+			break;
+		case NV_10:
+		case NV_20:
+		case NV_30:
+			if (dev_priv->chipset < 0x17)
+				nv10_fifo_create(dev);
+			else
+				nv17_fifo_create(dev);
+			break;
+		case NV_40:
+			nv40_fifo_create(dev);
+			break;
+		case NV_50:
+			if (dev_priv->chipset == 0x50)
+				nv50_fifo_create(dev);
+			else
+				nv84_fifo_create(dev);
+			break;
 		case NV_C0:
 		case NV_D0:
 			nvc0_fifo_create(dev);
+			break;
+		case NV_E0:
+			nve0_fifo_create(dev);
 			break;
 		default:
 			break;
 		}
 
-		NV_INFO(dev, "Init FENCE\n");
 		switch (dev_priv->card_type) {
+		case NV_04:
+			nv04_fence_create(dev);
+			break;
+		case NV_10:
+		case NV_20:
+		case NV_30:
+		case NV_40:
+		case NV_50:
+			if (dev_priv->chipset < 0x84)
+				nv10_fence_create(dev);
+			else
+				nv84_fence_create(dev);
+			break;
 		case NV_C0:
 		case NV_D0:
 		case NV_E0:
@@ -315,8 +667,17 @@ nouveau_card_init(struct drm_device *dev)
 			break;
 		}
 
-		NV_INFO(dev, "Init SOFTWARE\n");
 		switch (dev_priv->card_type) {
+		case NV_04:
+		case NV_10:
+		case NV_20:
+		case NV_30:
+		case NV_40:
+			nv04_software_create(dev);
+			break;
+		case NV_50:
+			nv50_software_create(dev);
+			break;
 		case NV_C0:
 		case NV_D0:
 		case NV_E0:
@@ -326,17 +687,34 @@ nouveau_card_init(struct drm_device *dev)
 			break;
 		}
 
-		NV_INFO(dev, "Init GRAPH\n");
 		switch (dev_priv->card_type) {
+		case NV_04:
+			nv04_graph_create(dev);
+			break;
+		case NV_10:
+			nv10_graph_create(dev);
+			break;
+		case NV_20:
+		case NV_30:
+			nv20_graph_create(dev);
+			break;
+		case NV_40:
+			nv40_graph_create(dev);
+			break;
+		case NV_50:
+			nv50_graph_create(dev);
+			break;
 		case NV_C0:
 		case NV_D0:
 			nvc0_graph_create(dev);
+			break;
+		case NV_E0:
+			nve0_graph_create(dev);
 			break;
 		default:
 			break;
 		}
 
-		NV_INFO(dev, "Init CRYPT\n");
 		switch (dev_priv->chipset) {
 		case 0x84:
 		case 0x86:
@@ -353,8 +731,16 @@ nouveau_card_init(struct drm_device *dev)
 			break;
 		}
 
-		NV_INFO(dev, "Init COPY\n");
 		switch (dev_priv->card_type) {
+		case NV_50:
+			switch (dev_priv->chipset) {
+			case 0xa3:
+			case 0xa5:
+			case 0xa8:
+				nva3_copy_create(dev);
+				break;
+			}
+			break;
 		case NV_C0:
 			if (!(nv_rd32(dev, 0x022500) & 0x00000200))
 				nvc0_copy_create(dev, 1);
@@ -366,7 +752,6 @@ nouveau_card_init(struct drm_device *dev)
 			break;
 		}
 
-		NV_INFO(dev, "Init OTHERS\n");
 		if (dev_priv->chipset >= 0xa3 || dev_priv->chipset == 0x98) {
 			nv84_bsp_create(dev);
 			nv84_vp_create(dev);
@@ -387,10 +772,8 @@ nouveau_card_init(struct drm_device *dev)
 			nv31_mpeg_create(dev);
 		}
 
-		NV_INFO(dev, "Init ENGINES\n");
 		for (e = 0; e < NVOBJ_ENGINE_NR; e++) {
 			if (dev_priv->eng[e]) {
-				NV_INFO(dev, "Init ENGINES[%d]\n", e);
 				ret = dev_priv->eng[e]->init(dev, e);
 				if (ret)
 					goto out_engine;
@@ -398,39 +781,31 @@ nouveau_card_init(struct drm_device *dev)
 		}
 	}
 
-	NV_INFO(dev, "Init IRQ\n");
 	ret = nouveau_irq_init(dev);
 	if (ret)
 		goto out_engine;
 
-	NV_INFO(dev, "Init DISPLAY CREATE\n");
 	ret = nouveau_display_create(dev);
 	if (ret)
 		goto out_irq;
 
-	NV_INFO(dev, "Init BACKLIGHT\n");
 	nouveau_backlight_init(dev);
-	NV_INFO(dev, "Init PM\n");
 	nouveau_pm_init(dev);
 
 	if (dev_priv->eng[NVOBJ_ENGINE_GR]) {
-		NV_INFO(dev, "Init CARD CHANNEL\n");
 		ret = nouveau_card_channel_init(dev);
 		if (ret)
 			goto out_pm;
 	}
 
 	if (dev->mode_config.num_crtc) {
-		NV_INFO(dev, "Init DISPLAY\n");
 		ret = nouveau_display_init(dev);
 		if (ret)
 			goto out_chan;
 
-		NV_INFO(dev, "Init FBCON\n");
 		nouveau_fbcon_init(dev);
 	}
 
-	NV_INFO(dev, "DONE\n");
 	return 0;
 
 out_chan:
