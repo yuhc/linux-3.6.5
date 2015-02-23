@@ -513,6 +513,48 @@ nouveau_gpuobj_gr_new(struct nouveau_channel *chan, u32 handle, int class)
 }
 
 static int
+nouveau_gpuobj_channel_init_pramin(struct nouveau_channel *chan)
+{
+	struct drm_device *dev = chan->dev;
+	struct drm_nouveau_private *dev_priv = dev->dev_private;
+	uint32_t size;
+	uint32_t base;
+	int ret;
+
+	NV_DEBUG(dev, "ch%d\n", chan->id);
+
+	/* Base amount for object storage (4KiB enough?) */
+	size = 0x2000;
+	base = 0;
+
+	if (dev_priv->card_type == NV_50) {
+		/* Various fixed table thingos */
+		size += 0x1400; /* mostly unknown stuff */
+		size += 0x4000; /* vm pd */
+		base  = 0x6000;
+		/* RAMHT, not sure about setting size yet, 32KiB to be safe */
+		size += 0x8000;
+		/* RAMFC */
+		size += 0x1000;
+	}
+
+	ret = nouveau_gpuobj_new(dev, NULL, size, 0x1000, 0, &chan->ramin);
+	if (ret) {
+		NV_ERROR(dev, "Error allocating channel PRAMIN: %d\n", ret);
+		return ret;
+	}
+
+	ret = drm_mm_init(&chan->ramin_heap, base, size - base);
+	if (ret) {
+		NV_ERROR(dev, "Error creating PRAMIN heap: %d\n", ret);
+		nouveau_gpuobj_ref(NULL, &chan->ramin);
+		return ret;
+	}
+
+	return 0;
+}
+
+static int
 nvc0_gpuobj_channel_init(struct nouveau_channel *chan, struct nouveau_vm *vm)
 {
 	struct drm_device *dev = chan->dev;
@@ -557,6 +599,109 @@ nouveau_gpuobj_channel_init(struct nouveau_channel *chan,
 	struct nouveau_vm *vm = fpriv ? fpriv->vm : dev_priv->chan_vm;
 	NV_INFO(dev, "ch%d vram=0x%08x tt=0x%08x\n", chan->id, vram_h, tt_h);
 	return nvc0_gpuobj_channel_init(chan, vm);
+	struct nouveau_gpuobj *vram = NULL, *tt = NULL;
+	int ret;
+
+	NV_DEBUG(dev, "ch%d vram=0x%08x tt=0x%08x\n", chan->id, vram_h, tt_h);
+	if (dev_priv->card_type >= NV_C0)
+		return nvc0_gpuobj_channel_init(chan, vm);
+
+	/* Allocate a chunk of memory for per-channel object storage */
+	ret = nouveau_gpuobj_channel_init_pramin(chan);
+	if (ret) {
+		NV_ERROR(dev, "init pramin\n");
+		return ret;
+	}
+
+	/* NV50 VM
+	 *  - Allocate per-channel page-directory
+	 *  - Link with shared channel VM
+	 */
+	if (vm) {
+		u32 pgd_offs = (dev_priv->chipset == 0x50) ? 0x1400 : 0x0200;
+		u64 vm_vinst = chan->ramin->vinst + pgd_offs;
+		u32 vm_pinst = chan->ramin->pinst;
+
+		if (vm_pinst != ~0)
+			vm_pinst += pgd_offs;
+
+		ret = nouveau_gpuobj_new_fake(dev, vm_pinst, vm_vinst, 0x4000,
+					      0, &chan->vm_pd);
+		if (ret)
+			return ret;
+
+		nouveau_vm_ref(vm, &chan->vm, chan->vm_pd);
+	}
+
+	/* RAMHT */
+	if (dev_priv->card_type < NV_50) {
+		nouveau_ramht_ref(dev_priv->ramht, &chan->ramht, NULL);
+	} else {
+		struct nouveau_gpuobj *ramht = NULL;
+
+		ret = nouveau_gpuobj_new(dev, chan, 0x8000, 16,
+					 NVOBJ_FLAG_ZERO_ALLOC, &ramht);
+		if (ret)
+			return ret;
+
+		ret = nouveau_ramht_new(dev, ramht, &chan->ramht);
+		nouveau_gpuobj_ref(NULL, &ramht);
+		if (ret)
+			return ret;
+	}
+
+	/* VRAM ctxdma */
+	if (dev_priv->card_type >= NV_50) {
+		ret = nouveau_gpuobj_dma_new(chan, NV_CLASS_DMA_IN_MEMORY,
+					     0, (1ULL << 40), NV_MEM_ACCESS_RW,
+					     NV_MEM_TARGET_VM, &vram);
+		if (ret) {
+			NV_ERROR(dev, "Error creating VRAM ctxdma: %d\n", ret);
+			return ret;
+		}
+	} else {
+		ret = nouveau_gpuobj_dma_new(chan, NV_CLASS_DMA_IN_MEMORY,
+					     0, dev_priv->fb_available_size,
+					     NV_MEM_ACCESS_RW,
+					     NV_MEM_TARGET_VRAM, &vram);
+		if (ret) {
+			NV_ERROR(dev, "Error creating VRAM ctxdma: %d\n", ret);
+			return ret;
+		}
+	}
+
+	ret = nouveau_ramht_insert(chan, vram_h, vram);
+	nouveau_gpuobj_ref(NULL, &vram);
+	if (ret) {
+		NV_ERROR(dev, "Error adding VRAM ctxdma to RAMHT: %d\n", ret);
+		return ret;
+	}
+
+	/* TT memory ctxdma */
+	if (dev_priv->card_type >= NV_50) {
+		ret = nouveau_gpuobj_dma_new(chan, NV_CLASS_DMA_IN_MEMORY,
+					     0, (1ULL << 40), NV_MEM_ACCESS_RW,
+					     NV_MEM_TARGET_VM, &tt);
+	} else {
+		ret = nouveau_gpuobj_dma_new(chan, NV_CLASS_DMA_IN_MEMORY,
+					     0, dev_priv->gart_info.aper_size,
+					     NV_MEM_ACCESS_RW,
+					     NV_MEM_TARGET_GART, &tt);
+	}
+
+	if (ret) {
+		NV_ERROR(dev, "Error creating TT ctxdma: %d\n", ret);
+		return ret;
+	}
+
+	ret = nouveau_ramht_insert(chan, tt_h, tt);
+	nouveau_gpuobj_ref(NULL, &tt);
+	if (ret) {
+		NV_ERROR(dev, "Error adding TT ctxdma to RAMHT: %d\n", ret);
+		return ret;
+	}
+
+	return 0;
 }
 
 void
